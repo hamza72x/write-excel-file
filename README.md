@@ -545,6 +545,8 @@ await writeXlsxFile([data1, data2], {
 
 ## Images
 
+Warning: This feature is currently experimental and produces a somehow-incorrect `*.xlsx` file. See the details below in this section.
+
 Images reside in their own layer above any other data on a spreadsheet, each separate sheet having its own layer of images.
 
 To add images to a sheet, pass them as an `images` parameter to `writeXlsxFile()` function:
@@ -596,6 +598,18 @@ An image object should have properties:
 * `description` — (optional) Image description.
 
 The implementation details are described in a [document](https://gitlab.com/catamphetamine/write-excel-file/-/blob/main/docs/IMAGES.md).
+
+Using this feature currently produces a somehow-incorrect `*.xlsx` file. Perhaps there's something missing, or something like that. If someone would like, they could investigate:
+
+* Clone the repository
+* Run `npm install`
+* Run `npm test`
+* It will output a file at the `test-output` folder called `test-cells-multiple-sheets-with-images.xlsx`.
+* Open that file in Excel and see how it complains.
+* Unzip `test-cells-multiple-sheets-with-images.xlsx` and look at the files inside it.
+* Using Excel, create a sample `*.xlsx` file containing an image and unzip it too to be able to look at the files inside it.
+* Compare the both sets of files to potentially find the incorrect places.
+* Submit a pull request with a fix to this repository.
 
 ## TypeScript
 

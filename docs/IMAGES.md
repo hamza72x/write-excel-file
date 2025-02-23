@@ -329,11 +329,3 @@ Explanation of a "drawing" XML structure: http://officeopenxml.com/drwPicInSprea
 	<drawing r:id="rId{numericId}"/>
 </worksheet>
 ```
-
-## Implementation Notes
-
-* The image `content` could be passed in the following forms:
-  * On client: as a `File` or a `Blob`.
-    * Both `File` and `Blob` have a `type` property that corresponds to the assumed content type of the image, but that one [can't be relied on](https://developer.mozilla.org/en-US/docs/Web/API/Blob/type).
-  * On server: as a `String` path, or a `Buffer`, or a `Readable` stream.
-    * That would be analogous to the format [`read-excel-file`](https://gitlab.com/catamphetamine/read-excel-file) supports its input to be in, so the input handling code could be copypasted from that package, along with the TypeScript "typings".

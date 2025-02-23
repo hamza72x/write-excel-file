@@ -234,6 +234,7 @@ describe('writeXlsxFile', function() {
       images: [
         [
           {
+            // File path.
             content: path.join(IMAGES_DIRECTORY, '1.png'),
             contentType: 'image/png',
             width: 111,
@@ -244,6 +245,7 @@ describe('writeXlsxFile', function() {
             }
           },
           {
+            // Buffer.
             content: await fsPromises.readFile(path.join(IMAGES_DIRECTORY, '2.jpg')),
             contentType: 'image/jpeg',
             width: 111,
@@ -256,7 +258,7 @@ describe('writeXlsxFile', function() {
         ],
         [
           {
-            content: '...ReadableStream...',
+            // Readable stream.
             content: fs.createReadStream(path.join(IMAGES_DIRECTORY, '3.jpg')),
             contentType: 'image/jpeg',
             width: 111,
