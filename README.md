@@ -545,9 +545,57 @@ await writeXlsxFile([data1, data2], {
 
 ## Images
 
-This package currently doesn't support inserting images in a spreadsheet, although implementing such feature wouldn't be impossible because there has already been some reasearch done on the topic and the implementation guidelines are described in a [document](https://gitlab.com/catamphetamine/write-excel-file/-/blob/main/docs/IMAGES.md).
+Images reside in their own layer above any other data on a spreadsheet, each separate sheet having its own layer of images.
 
-The author of this package currently doesn't have the spare time to actually implement the feature.
+To add images to a sheet, pass them as an `images` parameter to `writeXlsxFile()` function:
+
+```js
+const images = [{ ... }, { ... }]
+
+// Without `schema`.
+await writeXlsxFile(data, { images })
+
+// With `schema`.
+await writeXlsxFile(objects, { schema, images })
+```
+
+In case when an `*.xlsx` file has multiple sheets:
+
+```js
+const images1 = [{ ... }, { ... }]
+const images2 = [{ ... }, { ... }]
+
+// Without `schema`.
+await writeXlsxFile([data1, data2], {
+  images: [images1, images2],
+  sheets: ['Sheet 1', 'Sheet 2']
+})
+
+// With `schema`.
+await writeXlsxFile([objects1, objects2], {
+  schema: [schema1, schema2],
+  images: [images1, images2],
+  sheets: ['Sheet 1', 'Sheet 2']
+})
+```
+
+An image object should have properties:
+
+* `content` — Image content.
+  * Browser: `File` or `Blob` or `ArrayBuffer`.
+  * Node: `String` file path or `Readable` stream or `Buffer`.
+* `contentType` — MIME content type of the image. Example: `"image/jpeg"`.
+* `width` — Image width, in pixels.
+* `height` — Image height, in pixels.
+* `anchor` — The cell that the image is positioned against. In other words, the image's top left corner is tied to the anchor cell's top left corner.
+  * `row` — Cell row number, starting with `1`.
+  * `column` — Cell column number, starting with `1`.
+* `offsetX` — (optional) Image horizontal offset, in pixels, relative to the anchor cell.
+* `offsetY` — (optional) Image vertical offset, in pixels, relative to the anchor cell.
+* `title` — (optional) Image title.
+* `description` — (optional) Image description.
+
+The implementation details are described in a [document](https://gitlab.com/catamphetamine/write-excel-file/-/blob/main/docs/IMAGES.md).
 
 ## TypeScript
 
