@@ -33,7 +33,7 @@ export default {
 					const conditionalFormattingPerSheet = multipleSheetsParameters ? conditionalFormattingParameter : [conditionalFormattingParameter]
 					const conditionalFormattingStylesXml = getConditionalFormattingStylesXml({ conditionalFormattingPerSheet })
 					if (conditionalFormattingStylesXml) {
-						return xml.replace(/<\/stylesheet>$/, conditionalFormattingStylesXml + '</stylesheet>')
+						return xml.replace(/<\/styleSheet>$/, conditionalFormattingStylesXml + '</styleSheet>')
 					}
 				}
 				return xml

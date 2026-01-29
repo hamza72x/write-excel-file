@@ -243,7 +243,7 @@ describe('writeXlsxFile', function() {
         },
         condition: {
           operator: '>',
-          value: 100
+          value: 200
         },
         style: {
           backgroundColor: '#cc0000'
