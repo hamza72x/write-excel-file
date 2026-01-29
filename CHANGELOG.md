@@ -1,3 +1,10 @@
+2.4.0 / 29.01.2026
+==================
+
+* Renamed `color` property of a cell to `textColor`. The old property name still works but is now deprecated.
+* Added custom `features` system that allows writing custom "plug-ins" for adding additional features to the library. A `features: Feature[]` parameter can now be passed. An example plug-in is `conditionalFormatting.js` / `conditionalFormatting.d.ts`.
+* Added "conditional formatting" feature that was [submitted](https://github.com/catamphetamine/write-excel-file/pull/10) by [Isaac Laquerre](https://github.com/IsaacLaquerre).
+
 2.3.3 / 25.07.2025
 ==================
 

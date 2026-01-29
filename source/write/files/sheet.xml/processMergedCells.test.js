@@ -10,7 +10,7 @@ describe('processMergedCells()', () => {
       ]
     ]
 
-    expect(processMergedCells(data, { schema: undefined }))
+    expect(processMergedCells(data, { schema: undefined, features: [] }))
       .to.deep.equal({
         data,
         mergedCells: [
@@ -41,7 +41,7 @@ describe('processMergedCells()', () => {
       ]
     ]
 
-    expect(processMergedCells(data, { schema: undefined }))
+    expect(processMergedCells(data, { schema: undefined, features: [] }))
       .to.deep.equal({
         data,
         mergedCells: [
@@ -60,7 +60,7 @@ describe('processMergedCells()', () => {
         { value: '2' },
         { value: '3' }
       ]
-    ], { schema: undefined }))
+    ], { schema: undefined, features: [] }))
       .to.throw('Cell at row 1 and column 2')
   })
 
@@ -74,7 +74,7 @@ describe('processMergedCells()', () => {
         { value: '2.1' },
         { value: '2.2' }
       ]
-    ], { schema: undefined }))
+    ], { schema: undefined, features: [] }))
       .to.throw('Cell at row 2 and column 1')
   })
 
@@ -95,7 +95,7 @@ describe('processMergedCells()', () => {
         { value: '3.2' },
         { value: '3.3' }
       ]
-    ], { schema: undefined }))
+    ], { schema: undefined, features: [] }))
       .to.throw('Cell at row 2 and column 2')
 
     expect(() => processMergedCells([
@@ -114,7 +114,7 @@ describe('processMergedCells()', () => {
         { value: '3.2' },
         { value: '3.3' }
       ]
-    ], { schema: undefined }))
+    ], { schema: undefined, features: [] }))
       .to.throw('Cell at row 3 and column 1')
   })
 
@@ -122,18 +122,20 @@ describe('processMergedCells()', () => {
     const data = [
       [
         { value: '1', span: 3, color: '#cc0000' },
+        // This cell is hidden (obscured by the `span`).
         undefined,
+        // This cell is hidden (obscured by the `span`).
         null
       ]
     ]
 
-    expect(processMergedCells(data, { schema: undefined }))
+    expect(processMergedCells(data, { schema: undefined, features: [] }))
       .to.deep.equal({
         data: [
           [
             { value: '1', span: 3, color: '#cc0000' },
-            { color: '#cc0000' },
-            { color: '#cc0000' }
+            { textColor: '#cc0000' },
+            { textColor: '#cc0000' }
           ]
         ],
         mergedCells: [

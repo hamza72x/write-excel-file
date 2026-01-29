@@ -19,7 +19,7 @@ import getCellStyleProperties from './helpers/getCellStyleProperties.js'
 //   [...]
 // ]
 
-export default function processMergedCells(data, { schema }) {
+export default function processMergedCells(data, { schema, features }) {
 	const mergedCells = []
 
 	if (schema) {
@@ -58,7 +58,7 @@ export default function processMergedCells(data, { schema }) {
 					// Validate that `span`-ning or `rowSpan`-ning cells only overlap
 					// `null` or `undefined` ones. Especially that `span`-ning or `rowSpan`-ning cells
 					// don't overlap other `span`-ning or `rowSpan`-ning cells.
-					processSpanningCells({ data, rowIndex, columnIndex, span, rowSpan, cloneData })
+					processSpanningCells({ data, rowIndex, columnIndex, span, rowSpan, cloneData, features })
 
 					// Add "merged cells" entry:
 					// `[ [fromRowIndex, fromColumnIndex], [toRowIndex, toColumnIndex] ]`.
@@ -88,8 +88,8 @@ export default function processMergedCells(data, { schema }) {
 // "Excel found unreadable content in 'file.xlsx'.
 //  Do you want to recover the contents of this workbook?
 //  If you trust the source of this workbook, click Yes".
-function processSpanningCells({ data, rowIndex, columnIndex, span, rowSpan, cloneData }) {
-	const cellStyleProperties = getCellStyleProperties(data[rowIndex][columnIndex])
+function processSpanningCells({ data, rowIndex, columnIndex, span, rowSpan, cloneData, features }) {
+	const cellStyleProperties = getCellStyleProperties(data[rowIndex][columnIndex], features)
 
 	if (cellStyleProperties) {
 		data = cloneData()

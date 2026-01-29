@@ -1,6 +1,4 @@
-import $text from '../xml/sanitizeText.js'
-
-export default function initSharedStrings() {
+export default function initializeSharedStrings() {
 	const sharedStrings = []
 	const sharedStringsIndex = {}
 

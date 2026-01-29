@@ -5,7 +5,7 @@
 import $text from '../../../xml/sanitizeText.js'
 import getAttributesString from '../../../xml/getAttributesString.js'
 
-import generateCellNumber from './helpers/generateCellNumber.js'
+import getCellCoordinate from '../../helpers/getCellCoordinate.js'
 import convertDateToExcelSerial from './helpers/convertDateToExcelSerial.js'
 
 export default function generateCell(
@@ -26,7 +26,7 @@ export default function generateCell(
   }
 
   const cellAttributes = {
-    r: generateCellNumber(columnIndex, rowNumber)
+    r: getCellCoordinate(rowNumber - 1, columnIndex)
   }
 
   // Available formatting style IDs (built-in in Excel):

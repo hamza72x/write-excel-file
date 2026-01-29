@@ -1,14 +1,14 @@
 // Copy-pasted from:
 // https://github.com/davidramos-om/zipcelx-on-steroids/blob/master/src/commons/generatorCellNumber.js
 
-export default function generateCellNumber(columnIndex, rowNumber) {
-  return `${generateColumnLetter(columnIndex)}${rowNumber}`
+export default function getCellCoordinate(rowIndex, columnIndex) {
+  return `${getColumnLetter(columnIndex)}${rowIndex + 1}`
 }
 
 // `26` letters in the alphabet: from "A" to "Z".
 const LETTERS_COUNT = 26
 
-function generateColumnLetter(columnIndex) {
+function getColumnLetter(columnIndex) {
   if (typeof columnIndex !== 'number') {
     return ''
   }
@@ -18,5 +18,5 @@ function generateColumnLetter(columnIndex) {
   if (prefix === 0) {
     return letter
   }
-  return generateColumnLetter(prefix - 1) + letter
+  return getColumnLetter(prefix - 1) + letter
 }

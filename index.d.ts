@@ -1,3 +1,6 @@
+import { Color, CommonStyleProperties } from './types/common.d.js'
+import { ConditionalFormattingParametersSingleSheet, ConditionalFormattingParametersMultipleSheets } from './types/features/conditionalFormatting.d.js'
+
 // Some users have requested exporting `ValueType` type.
 // https://gitlab.com/catamphetamine/write-excel-file/-/issues/30
 export type ValueType =
@@ -23,28 +26,7 @@ type TypeConstructor<Type> =
 
 type TypeOfType<Type> = TypeConstructor<Type> | 'Formula';
 
-type BorderStyle =
-	'hair' |
-	'dotted' |
-	'dashDotDot' |
-	'dashDot' |
-	'dashed' |
-	'thin' |
-	'mediumDashDotDot' |
-	'slantDashDot' |
-	'mediumDashDot' |
-	'mediumDashed' |
-	'medium' |
-	'double' |
-	'thick';
-
-type FontWeight = 'bold';
-
-type FontStyle = 'italic';
-
-type Color = string;
-
-interface CellStyle {
+interface CellStyle extends CommonStyleProperties {
 	align?: 'left' | 'center' | 'right';
 	alignVertical?: 'top' | 'center' | 'bottom';
 	height?: number;
@@ -55,20 +37,10 @@ interface CellStyle {
 	textRotation?: number;
 	fontFamily?: string;
 	fontSize?: number;
-	fontWeight?: FontWeight;
-	fontStyle?: FontStyle;
+	/**
+	 * @deprecated Use `textColor` property instead.
+	 */
 	color?: Color;
-	backgroundColor?: Color;
-	borderColor?: Color;
-	borderStyle?: BorderStyle;
-	leftBorderColor?: Color;
-  leftBorderStyle?: BorderStyle;
-  rightBorderColor?: Color;
-  rightBorderStyle?: BorderStyle;
-  topBorderColor?: Color;
-  topBorderStyle?: BorderStyle;
-  bottomBorderColor?: Color;
-  bottomBorderStyle?: BorderStyle;
 }
 
 interface CellProps<Type> extends CellStyle {
@@ -154,44 +126,95 @@ interface CommonOptionsWriteToFile<Object = never> extends CommonOptions<Object>
 	fileName: string;
 }
 
-// With Schema.
+export interface Feature {
+	transforms?: {
+		sheetXml?: {
+			transform: (
+				xml: string,
+				options: { sheetId: number, multipleSheetsParameters: boolean },
+				customTopLevelParameters: Record<string, any>
+			) => string;
 
-export interface OptionsSchemaImagesSheet<Image> {
-	schema: Schema<Object>;
+			// These parameters will be passed through to the `transform()` function above.
+			parameters?: string[];
+		},
+
+		stylesXml?: {
+			transform: (
+				xml: string,
+				options: {},
+				customTopLevelParameters: Record<string, any>
+			) => string;
+
+			// These parameters will be passed through to the `transform()` function above.
+			parameters?: string[];
+		},
+
+		style?: {
+			transform: (
+				properties: Record<string, any>,
+				customCellStyleParameters: Record<string, any>
+			) => Record<string, any>;
+
+			transformKey: (
+				key: string,
+				customCellStyleParameters: Record<string, any>
+			) => string;
+
+			// These parameters will be passed through to the `transform()` and `transformKey()` functions above.
+			parameters?: string[];
+		}
+	};
+}
+
+interface CommonOptions {
+	features?: Feature[];
+}
+
+interface CommonOptionsSingleSheet<Image> extends CommonOptions, ConditionalFormattingParametersSingleSheet {
   images?: Image[];
 	sheet?: string;
 }
 
-export interface OptionsSchemaImagesSheets<Image> {
-	schema: Schema<Object>[];
+interface CommonOptionsMultipleSheets<Image> extends CommonOptions, ConditionalFormattingParametersMultipleSheets {
   images?: Image[][];
 	sheets?: string[];
 }
 
-interface WithSchemaWithoutFileNameOptions<Object> extends CommonOptionsWithoutFileName<Object>, OptionsSchemaImagesSheet<Image> {
+// With Schema.
+
+export interface OptionsWithSchemaAndSingleSheet<Image> extends CommonOptionsSingleSheet<Image> {
+	schema: Schema<Object>;
 }
 
-interface WithSchemaWriteToFileOptions<Object> extends CommonOptionsWriteToFile<Object>, OptionsSchemaImagesSheet<Image> {
+export interface OptionsWithSchemaAndMultipleSheets<Image> extends CommonOptionsMultipleSheets<Image> {
+	schema: Schema<Object>[];
 }
 
-interface WithSchemaWithoutFileNameOptionsMultipleSheets<Object> extends CommonOptionsWithoutFileName<Object>, OptionsSchemaImagesSheets<Image> {
+interface OptionsWithSchemaWithoutFileNameSingleSheet<Object> extends CommonOptionsWithoutFileName<Object>, OptionsWithSchemaAndSingleSheet<Image> {
 }
 
-interface WithSchemaWriteToFileOptionsMultipleSheets<Object> extends CommonOptionsWriteToFile<Object>, OptionsSchemaImagesSheets<Image> {
+interface OptionsWithSchemaWriteToFileSingleSheet<Object> extends CommonOptionsWriteToFile<Object>, OptionsWithSchemaAndSingleSheet<Image> {
+}
+
+interface OptionsWithSchemaWithoutFileNameMultipleSheets<Object> extends CommonOptionsWithoutFileName<Object>, OptionsWithSchemaAndMultipleSheets<Image> {
+}
+
+interface OptionsWithSchemaWriteToFileMultipleSheets<Object> extends CommonOptionsWriteToFile<Object>, OptionsWithSchemaAndMultipleSheets<Image> {
 }
 
 // With `schema`.
 // Write to a file.
 declare function writeXlsxFile<Object>(
 	objects: Object[],
-	options: WithSchemaWriteToFileOptions<Object>
+	options: OptionsWithSchemaWriteToFileSingleSheet<Object>
 ) : Promise<void>;
 
 // With `schema`.
 // Return `Blob`.
 declare function writeXlsxFile<Object>(
 	objects: Object[],
-	options: WithSchemaWithoutFileNameOptions<Object>
+	options: OptionsWithSchemaWithoutFileNameSingleSheet<Object>
 ) : Promise<Blob>;
 
 // With `schema`.
@@ -199,7 +222,7 @@ declare function writeXlsxFile<Object>(
 // Multiple `sheets`.
 declare function writeXlsxFile<Object>(
 	objects: Object[][],
-	options: WithSchemaWriteToFileOptionsMultipleSheets<Object>
+	options: OptionsWithSchemaWriteToFileMultipleSheets<Object>
 ) : Promise<void>;
 
 // With `schema`.
@@ -207,59 +230,55 @@ declare function writeXlsxFile<Object>(
 // Multiple `sheets`.
 declare function writeXlsxFile<Object>(
 	objects: Object[][],
-	options: WithSchemaWithoutFileNameOptionsMultipleSheets<Object>
+	options: OptionsWithSchemaWithoutFileNameMultipleSheets<Object>
 ) : Promise<Blob>;
 
 // Without Schema.
 
-export interface OptionsColumnsImagesSheet<Image> {
+export interface OptionsWithoutSchemaSingleSheet<Image> extends CommonOptionsSingleSheet<Image> {
 	columns?: Columns;
-  images?: Image[];
-	sheet?: string;
 }
 
-export interface OptionsColumnsImagesSheets<Image> {
+export interface OptionsWithoutSchemaMultipleSheets<Image> extends CommonOptionsMultipleSheets<Image> {
 	columns?: Columns[];
-  images?: Image[][];
-	sheets?: string[];
 }
 
-interface WithoutSchemaWithoutFileNameOptions extends CommonOptionsWithoutFileName, OptionsColumnsImagesSheet<Image> {
+interface OptionsWithoutSchemaWithoutFileNameSingleSheet extends CommonOptionsWithoutFileName, OptionsWithoutSchemaSingleSheet<Image> {
 }
 
-interface WithoutSchemaWriteToFileOptions extends CommonOptionsWriteToFile, OptionsColumnsImagesSheet<Image> {
+interface OptionsWithoutSchemaWriteToFileSingleSheet extends CommonOptionsWriteToFile, OptionsWithoutSchemaSingleSheet<Image> {
 }
 
-interface WithoutSchemaWithoutFileNameOptionsMultipleSheets extends CommonOptionsWithoutFileName, OptionsColumnsImagesSheets<Image> {
+interface OptionsWithoutSchemaWithoutFileNameMultipleSheets extends CommonOptionsWithoutFileName, OptionsWithoutSchemaMultipleSheets<Image> {
 }
 
-interface WithoutSchemaWriteToFileOptionsMultipleSheets extends CommonOptionsWriteToFile, OptionsColumnsImagesSheets<Image> {
+interface OptionsWithoutSchemaWriteToFileMultipleSheets extends CommonOptionsWriteToFile, OptionsWithoutSchemaMultipleSheets<Image> {
 }
 
 // Return `Blob`.
 declare function writeXlsxFile(
 	data: SheetData,
-	options: WithoutSchemaWithoutFileNameOptions
+	options: OptionsWithoutSchemaWithoutFileNameSingleSheet
 ) : Promise<Blob>;
 
 // Return `Blob`.
 // Multiple `sheets`.
 declare function writeXlsxFile(
 	data: SheetData[],
-	options: WithoutSchemaWithoutFileNameOptionsMultipleSheets
+	options: OptionsWithoutSchemaWithoutFileNameMultipleSheets
 ) : Promise<Blob>;
 
 // Wrtie to a file.
 declare function writeXlsxFile(
 	data: SheetData,
-	options: WithoutSchemaWriteToFileOptions
+	options: OptionsWithoutSchemaWriteToFileSingleSheet
 ) : Promise<void>;
 
 // Wrtie to a file.
 // Multiple `sheets`.
 declare function writeXlsxFile(
 	data: SheetData[],
-	options: WithoutSchemaWriteToFileOptionsMultipleSheets
+	options: OptionsWithoutSchemaWriteToFileMultipleSheets
 ) : Promise<void>;
 
 export default writeXlsxFile;

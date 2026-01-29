@@ -225,7 +225,55 @@ describe('writeXlsxFile', function() {
     await writeXlsxFile(data, { columns, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-landscape.xlsx'), orientation: 'landscape' })
     await writeXlsxFile([data, data], { sheets: ['Sheet One', 'Sheet Two'], columns: [columns, columns], filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-multiple-sheets.xlsx') })
     await writeXlsxFile(data, { columns, filePath: path.join(OUTPUT_DIRECTORY, 'test-default-font.xlsx'), fontFamily: 'Arial', fontSize: 16 })
-    await writeXlsxFile(data, { columns,  showGridLines: false, filePath: path.join(OUTPUT_DIRECTORY, 'test-hide-grid-lines.xlsx') })
+    await writeXlsxFile(data, { columns, showGridLines: false, filePath: path.join(OUTPUT_DIRECTORY, 'test-hide-grid-lines.xlsx') })
+
+    // Conditional formatting.
+    await writeXlsxFile(data, {
+      columns,
+      conditionalFormatting: [{
+        cells: {
+          from: {
+            row: 2,
+            column: 1
+          },
+          to: {
+            row: 3,
+            column: 1
+          }
+        },
+        condition: {
+          operator: '>',
+          value: 100
+        },
+        style: {
+          backgroundColor: '#cc0000'
+        }
+      }],
+      filePath: path.join(OUTPUT_DIRECTORY, 'test-conditional-formatting.xlsx')
+    })
+
+    // Custom feature.
+    const zoomScaleFeature = {
+      transforms: {
+        sheetXml: {
+          transform: (xml, {}, { zoomScale }) => {
+            if (typeof zoomScale === 'number') {
+              // Excel 2007 doesn't like fractional `zoomScale` percentage values.
+              // To work around that, it rounds it.
+              return xml.replace(/<sheetView /g, `<sheetView zoomScale="${Math.round(zoomScale * 100)}" `)
+            }
+            return xml
+          },
+          parameters: ['zoomScale']
+        }
+      }
+    }
+    await writeXlsxFile(data, {
+      columns,
+      zoomScale: 1.5,
+      features: [zoomScaleFeature],
+      filePath: path.join(OUTPUT_DIRECTORY, 'test-custom-feature-zoom-scale.xlsx')
+    })
 
     await writeXlsxFile([data, data], {
       sheets: ['Sheet One', 'Sheet Two'],
@@ -328,7 +376,7 @@ describe('writeXlsxFile', function() {
     const buffer = await writeXlsxFile(data, { columns, buffer: true })
     writeBufferToFile(buffer, path.join(OUTPUT_DIRECTORY, 'test-buffer.xlsx'))
 
-    console.log('Check `test-schema.xlsx`, `test-stream.xml` and `test-cells.xlsx` files in the `test` folder')
+    console.log('Check `*.xlsx` files in the `test-output` folder')
   })
 })
 

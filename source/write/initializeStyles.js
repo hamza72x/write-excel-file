@@ -1,12 +1,12 @@
-import $attr from '../xml/sanitizeAttributeValue.js'
-
 // There seem to be about 100 "built-in" formats in Excel.
 // https://docs.microsoft.com/en-us/previous-versions/office/developer/office-2010/ee857658(v=office.14)?redirectedfrom=MSDN
 export const FORMAT_ID_STARTS_FROM = 100
 
-export default function initStyles({
+export default function initializeStyles({
   fontFamily: defaultFontFamily,
-  fontSize: defaultFontSize
+  fontSize: defaultFontSize,
+  features,
+  ...restParameters
 }) {
   const customFont = Boolean(defaultFontFamily || defaultFontSize)
 
@@ -41,7 +41,7 @@ export default function initStyles({
   })
   fontsIndex['-:-'] = 0
 
-  // Default fill.
+  // Default fill (no color).
   fills.push({})
   fillsIndex['-'] = 0
 
@@ -54,9 +54,11 @@ export default function initStyles({
   })
   bordersIndex['-:-/-:-/-:-/-:-'] = 0
 
-  // "gray125" fill.
-  // For some weird reason, MS Office 2007 Excel seems to require that to be present.
-  // Otherwise, if absent, it would replace the first `backgroundColor`.
+  // Always add a mandatory "gray125" fill.
+  // For some weird reason, MS Office 2007 Excel seems to require this type of `<fill>`
+  // to always be present in an `*.xslx` document.
+  // Otherwise, if this `<fill>` is absent in the document, it would forcefully overwrite
+  // the first custom `backgroundColor` with a "gray125" fill.
   fills.push({
     gray125: true
   })
@@ -71,8 +73,10 @@ export default function initStyles({
     fontSize,
     fontWeight,
     fontStyle,
-    color,
+    textColor,
     backgroundColor,
+    fillPatternStyle,
+    fillPatternColor,
     borderColor,
     borderStyle,
     leftBorderColor,
@@ -82,15 +86,14 @@ export default function initStyles({
     topBorderColor,
     topBorderStyle,
     bottomBorderColor,
-    bottomBorderStyle
+    bottomBorderStyle,
+    ...restParameters
   }, {
     format
   }) {
-    // Custom borders aren't supported.
-    const border = undefined
     // Look for an existing style.
-    const fontKey = `${fontFamily || '-'}:${fontSize || '-'}:${fontWeight || '-'}:${fontStyle || '-'}:${color || '-'}`
-    const fillKey = backgroundColor || '-'
+    const fontKey = `${fontFamily || '-'}:${fontSize || '-'}:${fontWeight || '-'}:${fontStyle || '-'}:${textColor || '-'}`
+    const fillKey = `${backgroundColor || '-'}:${fillPatternStyle || '-'}:${fillPatternColor || '-'}`
     const borderKey =
       `${(topBorderColor || borderColor) || '-'}:${(topBorderStyle || borderStyle) || '-'}` +
       '/' +
@@ -99,12 +102,23 @@ export default function initStyles({
       `${(bottomBorderColor || borderColor) || '-'}:${(bottomBorderStyle || borderStyle) || '-'}` +
       '/' +
       `${(leftBorderColor || borderColor) || '-'}:${(leftBorderStyle || borderStyle) || '-'}`
-    const key = `${align || '-'}/${alignVertical || '-'}/${textRotation || '-'}/${indent || '-'}/${wrap || '-'}/${format || '-'}/${fontKey}/${fillKey}/${borderKey}`
+
+    let key = `${align || '-'}/${alignVertical || '-'}/${textRotation || '-'}/${indent || '-'}/${wrap || '-'}/${format || '-'}/${fontKey}/${fillKey}/${borderKey}`
+
+    // Apply any plugins that add custom styling.
+    for (const feature of features) {
+      if (feature.transforms && feature.transforms.style) {
+        key = feature.transforms.style.transformKey(key, restParameters)
+      }
+    }
+
     const styleId = stylesIndex[key]
     if (styleId !== undefined) {
       return styleId
     }
+
     // Create new style.
+
     // Get format ID.
     let formatId
     if (format) {
@@ -114,9 +128,10 @@ export default function initStyles({
         formats.push(format)
       }
     }
+
     // Get font ID.
     let fontId = customFont ? 0 : undefined
-    if (fontFamily || fontSize || fontWeight || fontStyle || color) {
+    if (fontFamily || fontSize || fontWeight || fontStyle || textColor) {
       fontId = fontsIndex[fontKey]
       if (fontId === undefined) {
         fontId = fontsIndex[fontKey] = String(fonts.length)
@@ -126,21 +141,25 @@ export default function initStyles({
           family: fontFamily || defaultFontFamily,
           weight: fontWeight,
           style: fontStyle,
-          color
+          color: textColor
         })
       }
     }
+
     // Get fill ID.
     let fillId
-    if (backgroundColor) {
+    if (backgroundColor || fillPatternStyle || fillPatternColor) {
       fillId = fillsIndex[fillKey]
       if (fillId === undefined) {
         fillId = fillsIndex[fillKey] = String(fills.length)
         fills.push({
-          color: backgroundColor
+          backgroundColor,
+          fillPatternStyle,
+          fillPatternColor
         })
       }
     }
+
     // Get border ID.
     let borderId
     if (
@@ -178,8 +197,18 @@ export default function initStyles({
         })
       }
     }
+
+    // Apply any plugins that add custom styling.
+    const customStyleProperties = {}
+    for (const feature of features) {
+      if (feature.transforms && feature.transforms.style) {
+        customStyleProperties = feature.transforms.style.transform(customStyleProperties, restParameters)
+      }
+    }
+
     // Add a style.
     styles.push({
+      ...customStyleProperties,
       fontId,
       fillId,
       borderId,
@@ -190,6 +219,7 @@ export default function initStyles({
       wrap,
       formatId
     })
+
     return stylesIndex[key] = String(styles.length - 1)
   }
 
@@ -198,7 +228,14 @@ export default function initStyles({
 
   return {
     getStyles() {
-      return { formats, styles, fonts, fills, borders }
+      return {
+        formats,
+        styles,
+        fonts,
+        fills,
+        borders,
+        ...restParameters
+      }
     },
     getStyle
   }

@@ -1,4 +1,6 @@
-export default function getCellStyleProperties(cell) {
+import addProperties from '../../../helpers/addProperties.js'
+
+export default function getCellStyleProperties(cell, features) {
 	const {
 		align,
 		alignVertical,
@@ -9,8 +11,12 @@ export default function getCellStyleProperties(cell) {
 		fontSize,
 		fontWeight,
 		fontStyle,
+		textColor: textColorPropertyValue,
+		// `color` property name is deprecated, use `textColor` property instead.
 		color,
 		backgroundColor,
+		fillPatternStyle,
+		fillPatternColor,
 		borderColor,
 		borderStyle,
 		leftBorderColor,
@@ -23,7 +29,19 @@ export default function getCellStyleProperties(cell) {
 		bottomBorderStyle
 	} = cell
 
-	if (align ||
+	// `color` property name is deprecated, use `textColor` property instead.
+	const textColor = textColorPropertyValue || color
+
+	// Add any custom cell style properties that're used by plugins.
+	const additionalProperties = {}
+	for (const feature of features) {
+		if (feature.transforms && feature.transforms.style && feature.transforms.style.parameters) {
+			addProperties(additionalProperties, cell, feature.transforms.style.parameters)
+		}
+	}
+
+	if (
+		align ||
 		alignVertical ||
 		textRotation ||
 		indent ||
@@ -32,8 +50,10 @@ export default function getCellStyleProperties(cell) {
 		fontSize ||
 		fontWeight ||
 		fontStyle ||
-		color ||
+		textColor ||
 		backgroundColor ||
+		fillPatternStyle ||
+		fillPatternColor ||
 		borderColor ||
 		borderStyle ||
 		leftBorderColor ||
@@ -43,9 +63,11 @@ export default function getCellStyleProperties(cell) {
 		topBorderColor ||
 		topBorderStyle ||
 		bottomBorderColor ||
-		bottomBorderStyle
+		bottomBorderStyle ||
+		Object.keys(additionalProperties).length > 0
 	) {
 		return omitUndefinedProperties({
+			...additionalProperties,
 			align,
 			alignVertical,
 			textRotation,
@@ -55,7 +77,7 @@ export default function getCellStyleProperties(cell) {
 			fontSize,
 			fontWeight,
 			fontStyle,
-			color,
+			textColor,
 			backgroundColor,
 			borderColor,
 			borderStyle,

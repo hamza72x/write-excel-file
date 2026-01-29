@@ -11,7 +11,7 @@ describe('generateMergedCellsDescription()', () => {
       ]
     ]
 
-    const { mergedCells } = processMergedCells(data, { schema: undefined })
+    const { mergedCells } = processMergedCells(data, { schema: undefined, features: [] })
 
     expect(generateMergedCellsDescription(mergedCells))
       .to.equal('<mergeCells count="1"><mergeCell ref="A1:C1"/></mergeCells>')
@@ -36,7 +36,7 @@ describe('generateMergedCellsDescription()', () => {
       ]
     ]
 
-    const { mergedCells } = processMergedCells(data, { schema: undefined })
+    const { mergedCells } = processMergedCells(data, { schema: undefined, features: [] })
 
     expect(generateMergedCellsDescription(mergedCells))
       .to.equal('<mergeCells count="1"><mergeCell ref="A2:C3"/></mergeCells>')

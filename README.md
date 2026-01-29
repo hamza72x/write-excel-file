@@ -362,9 +362,13 @@ Cell style properties:
 
 * `fontStyle: string` — Can be used to make text appear italicized. Available values: `"italic"`.
 
-* `color: string` — Cell text color (in hexademical format). Example: `"#aabbcc"`.
+* `textColor: string` — Cell text color (in hexademical format). Example: `"#aabbcc"`.
 
 * `backgroundColor: string` — Cell background color (in hexademical format). Example: `"#aabbcc"`.
+
+* `fillPatternStyle: string` — Cell fill pattern style. Example: `"lightGrid"`.
+
+* `fillPatternColor: string` — Cell fill pattern color (in hexademical format). Example: `"#aabbcc"`.
 
 * `borderColor: string` — Cell border color. Example: `"#aabbcc"`.
 
@@ -600,6 +604,80 @@ An image object should have properties:
 * `description` — (optional) Image description.
 
 The implementation details are described in a [document](https://gitlab.com/catamphetamine/write-excel-file/-/blob/main/docs/IMAGES.md).
+
+## Conditional Formatting
+
+Conditional formatting could be specified by passing a `conditionalFormatting` parameter.
+
+```js
+import writeXlsxFile from 'write-excel-file'
+
+await writeXlsxFile(data, {
+  fileName: 'file.xlsx',
+  conditionalFormatting: [{
+    cells: {
+      from: {
+        row: 2,
+        column: 1
+      },
+      to: {
+        row: 3,
+        column: 1
+      }
+    },
+    condition: {
+      operator: '>',
+      value: 100
+    },
+    style: {
+      backgroundColor: '#cc0000'
+    }
+  }]
+})
+```
+
+* `cells` — an object specifying a cell range defined by a `from` cell and a `to` cell
+  * `row` is a row number (starting from `1`)
+  * `column` is a column number (starting from `1`)
+* `condition` — an object specifying a condition
+  * Cell value comparison:
+    * Comparison to `value`: `{ operator: '<', value: 100 }`
+    * Between `value` and `value2`: `{ operator: '...', value: 100, value2: 200 }`
+    * Available `operator`s: `<`, `>`, `<=`, `>=`, `=`, `!=`, `...`
+  * Custom formula: `{ formula: '=$A1="Complete"' }`
+* `style` — an object specifying a style to apply
+  * Supports a subset of [cell style](#style) properties:
+    * Text color
+    * Background color
+    * Fill
+    * Border
+    * Font weight
+    * Font style
+  * With some additional properties:
+    * `textDecoration` — one of: `"strikethrough"`, `"underline"`, `"double-underline"`
+
+## Features
+
+This package is extensible by providing custom "features".
+
+```js
+// TypeScript "definition" of a "feature".
+import type { Feature } from 'write-excel-file'
+
+import writeXlsxFile from 'write-excel-file'
+
+// A custom feature should implement the `Feature` TypeScript interface.
+const myCustomFeature: Feature = {
+  ...
+}
+
+await writeXlsxFile(data, {
+  fileName: 'file.xlsx',
+  features: [myCustomFeature]
+})
+```
+
+For an example of a "feature" implementation see `./source/write/features` directory. Also see the definition of the `Feature` TypeScript interface in `./index.d.ts` file and see `./types/features` directory for TypeScript definitions of "features".
 
 ## CDN
 

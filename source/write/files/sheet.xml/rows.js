@@ -9,7 +9,8 @@ export default function generateRows(data, {
 	getStyle,
 	getSharedString,
 	customFont,
-	dateFormat
+	dateFormat,
+	features
 }) {
 	if (schema) {
 		let header = []
@@ -41,6 +42,7 @@ export default function generateRows(data, {
 		getSharedString,
 		customFont,
 		dateFormat,
+		features,
 		usesSchema: schema !== undefined
 	})).join('')
 }

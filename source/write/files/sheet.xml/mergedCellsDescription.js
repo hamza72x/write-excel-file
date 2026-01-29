@@ -1,4 +1,4 @@
-import generateCellNumber from './helpers/generateCellNumber.js'
+import getCellCoordinate from '../../helpers/getCellCoordinate.js'
 
 // Supports "merging cells" across columns and rows.
 // https://rdrr.io/cran/openxlsx/man/mergeCells.html
@@ -27,9 +27,9 @@ export default function generateMergedCellsDescription(mergedCells) {
 	return `<mergeCells count="${mergedCells.length}">` +
 		mergedCells.map(([from, to]) => {
 			const coordinates =
-				generateCellNumber(from[1], from[0] + 1) +
+				getCellCoordinate(from[0], from[1]) +
 				':' +
-				generateCellNumber(to[1], to[0] + 1)
+				getCellCoordinate(to[0], to[1])
 			return `<mergeCell ref="${coordinates}"/>`
 		}).join('') +
 		'</mergeCells>'

@@ -1,7 +1,20 @@
 import $attr from '../../xml/sanitizeAttributeValue.js'
-import { FORMAT_ID_STARTS_FROM } from '../styles.js'
+import { getFillXml } from '../helpers/fill.js'
+import { getBorderXml } from '../helpers/border.js'
+import getXlsxColorForHexColor from '../helpers/getXlsxColorForHexColor.js'
 
-export default function generateStylesXml({ formats, styles, fonts, fills, borders }) {
+import { FORMAT_ID_STARTS_FROM } from '../initializeStyles.js'
+
+export default function generateStylesXml(parameters, multipleSheetsParameters, features) {
+  const {
+    formats,
+    styles,
+    fonts,
+    fills,
+    borders,
+    ...restParameters
+  } = parameters
+
   let xml = '<?xml version="1.0" ?>'
   xml += '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
 
@@ -34,7 +47,7 @@ export default function generateStylesXml({ formats, styles, fonts, fills, borde
     } = font
     xml += '<font>'
     xml += `<sz val="${size}"/>`
-    xml += `<color ${color ? 'rgb="' + $attr(getColor(color)) + '"' : 'theme="1"'}/>`
+    xml += `<color ${color ? 'rgb="' + $attr(getXlsxColorForHexColor(color)) + '"' : 'theme="1"'}/>`
     xml += `<name val="${$attr(family)}"/>`
     // It's not clear what the `<family/>` tag means or does.
     // It seems to always be `<family val="2"/>` even for different
@@ -72,23 +85,16 @@ export default function generateStylesXml({ formats, styles, fonts, fills, borde
   // without it, MS Office 2007 Excel thinks that the file is broken.
   xml += `<fills count="${fills.length}">`
   for (const fill of fills) {
-    const { color, gray125 } = fill
-    xml += '<fill>'
-    if (color) {
-      xml += '<patternFill patternType="solid">'
-      xml += `<fgColor rgb="${$attr(getColor(color))}"/>`
-      // Whatever that could mean.
-      xml += '<bgColor indexed="64"/>'
-      xml += '</patternFill>'
-    } else if (gray125) {
+    if (fill.gray125) {
       // "gray125" fill.
       // For some weird reason, MS Office 2007 Excel seems to require that to be present.
       // Otherwise, if absent, it would replace the first `backgroundColor`.
+      xml += '<fill>'
       xml += '<patternFill patternType="gray125"/>'
+      xml += '</fill>'
     } else {
-      xml += '<patternFill patternType="none"/>'
+      xml += getFillXml(fill)
     }
-    xml += '</fill>'
   }
   xml += '</fills>'
 
@@ -96,30 +102,7 @@ export default function generateStylesXml({ formats, styles, fonts, fills, borde
   // without it, MS Office 2007 Excel thinks that the file is broken.
   xml += `<borders count="${borders.length}">`
   for (const border of borders) {
-    const {
-      left,
-      right,
-      top,
-      bottom
-    } = border
-    const getBorderXml = (direction, { style, color }) => {
-      if (color && !style) {
-        style = 'thin'
-      }
-      const hasChildren = color ? true : false
-      return `<${direction}` +
-        (style ? ` style="${$attr(style)}"` : '') +
-        (hasChildren ? '>' : '/>') +
-        (color ? `<color rgb="${$attr(getColor(color))}"/>` : '') +
-        (hasChildren ? `</${direction}>` : '')
-    }
-    xml += '<border>'
-    xml += getBorderXml('left', left)
-    xml += getBorderXml('right', right)
-    xml += getBorderXml('top', top)
-    xml += getBorderXml('bottom', bottom)
-    xml += '<diagonal/>'
-    xml += '</border>'
+    xml += getBorderXml(border)
   }
   xml += '</borders>'
 
@@ -197,14 +180,14 @@ export default function generateStylesXml({ formats, styles, fonts, fills, borde
 
   xml += '</styleSheet>'
 
-  return xml
-}
-
-function getColor(color) {
-  if (color[0] !== '#') {
-    throw new Error(`Color "${color}" must start with a "#"`)
+	// Apply any plugins that transform `styles.xml`.
+  for (const feature of features) {
+    if (feature.transforms && feature.transforms.stylesXml) {
+      xml = feature.transforms.stylesXml.transform(xml, { multipleSheetsParameters }, restParameters)
+    }
   }
-  return `FF${color.slice('#'.length).toUpperCase()}`
+
+  return xml
 }
 
 // Validates text rotation parameter value.

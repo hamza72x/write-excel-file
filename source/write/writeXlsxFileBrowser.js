@@ -8,7 +8,7 @@ import getImageFileName from './getImageFileName.js'
 
 import generateWorkbookXml from './files/workbook.xml.js'
 import generateWorkbookXmlRels from './files/workbook.xml.rels.js'
-import rels from './files/rels.js'
+import relsXml from './files/rels.js'
 import generateContentTypesXml from './files/[Content_Types].xml.js'
 import generateDrawingXml from './files/drawing.xml.js'
 import generateDrawingXmlRels from './files/drawing.xml.rels.js'
@@ -16,7 +16,14 @@ import generateSheetXmlRels from './files/sheet.xml.rels.js'
 import generateSharedStringsXml from './files/sharedStrings.xml.js'
 import generateStylesXml from './files/styles.xml.js'
 
-import { generateSheets } from './writeXlsxFile.common.js'
+import getFeatures from './getFeatures.js'
+import generateSheets from './generateSheets.js'
+
+import {
+	getSheetsParameters,
+	getContentTypesParameters,
+	getWorkbookParameters
+} from './parameters.js'
 
 export default function writeXlsxFile(data, { fileName, ...rest } = {}) {
   return generateXlsxFile(data, rest).then((blob) => {
@@ -33,56 +40,30 @@ export default function writeXlsxFile(data, { fileName, ...rest } = {}) {
  * "The reason if you want to send the excel file or store it natively on Cordova/capacitor app".
  * @return {Blob}
  */
-function generateXlsxFile(data, {
-  sheet: sheetName,
-  sheets: sheetNames,
-  schema,
-  columns,
-  images,
-  headerStyle,
-  getHeaderStyle,
-  fontFamily,
-  fontSize,
-  orientation,
-  stickyRowsCount,
-  stickyColumnsCount,
-  showGridLines,
-  rightToLeft,
-  dateFormat
-}) {
+function generateXlsxFile(data, functionParameters) {
+  const {
+    features: customFeatures,
+    ...parameters
+  } = functionParameters
+
+  const features = getFeatures(customFeatures)
+
   const zip = new JSZip()
 
   const {
     sheets,
     getSharedStrings,
-    getStyles
-  } = generateSheets({
-    data,
-    sheetName,
-    sheetNames,
-    schema,
-    columns,
-    images,
-    headerStyle,
-    getHeaderStyle,
-    fontFamily,
-    fontSize,
-    orientation,
-    stickyRowsCount,
-    stickyColumnsCount,
-    showGridLines,
-    rightToLeft,
-    dateFormat
-  })
+    getStyles,
+    multipleSheetsParameters
+  } = generateSheets(getSheetsParameters(parameters, data, features))
 
-  zip.file('_rels/.rels', rels)
-
-  zip.file('[Content_Types].xml', generateContentTypesXml({ sheets, images }))
+  zip.file('[Content_Types].xml', generateContentTypesXml({ sheets, ...getContentTypesParameters(parameters) }))
+  zip.file('_rels/.rels', relsXml)
 
   const xl = zip.folder('xl')
   xl.file('_rels/workbook.xml.rels', generateWorkbookXmlRels({ sheets }))
-  xl.file('workbook.xml', generateWorkbookXml({ sheets, stickyRowsCount, stickyColumnsCount }))
-  xl.file('styles.xml', generateStylesXml(getStyles()))
+  xl.file('workbook.xml', generateWorkbookXml({ sheets, ...getWorkbookParameters(parameters) }))
+  xl.file('styles.xml', generateStylesXml(getStyles(), multipleSheetsParameters, features))
   xl.file('sharedStrings.xml', generateSharedStringsXml(getSharedStrings()))
 
   for (const { id, data, images } of sheets) {

@@ -42,34 +42,34 @@ interface WithSchemaCommonOptionsReturnBuffer<Object> extends CommonOptions<Obje
 interface WithSchemaCommonOptionsReturnStream<Object> extends CommonOptions<Object> {
 }
 
-interface OptionsSchemaImagesSheet {
+interface OptionsWithSchemaAndSingleSheet {
 	schema: Schema<Object>;
   images?: Image[];
 	sheet?: string;
 }
 
-interface OptionsSchemaImagesSheets {
+interface OptionsWithSchemaAndMultipleSheets {
 	schema: Schema<Object>[];
   images?: Image[][];
 	sheets?: string[];
 }
 
-interface WithSchemaOptionsWriteToFile<Object> extends WithSchemaCommonOptionsWriteToFile<Object>, OptionsSchemaImagesSheet {
+interface WithSchemaOptionsWriteToFile<Object> extends WithSchemaCommonOptionsWriteToFile<Object>, OptionsWithSchemaAndSingleSheet {
 }
 
-interface WithSchemaOptionsMultipleSheetsWriteToFile<Object> extends WithSchemaCommonOptionsWriteToFile<Object>, OptionsSchemaImagesSheets {
+interface WithSchemaOptionsMultipleSheetsWriteToFile<Object> extends WithSchemaCommonOptionsWriteToFile<Object>, OptionsWithSchemaAndMultipleSheets {
 }
 
-interface WithSchemaOptionsReturnBuffer<Object> extends WithSchemaCommonOptionsReturnBuffer<Object>, OptionsSchemaImagesSheet {
+interface WithSchemaOptionsReturnBuffer<Object> extends WithSchemaCommonOptionsReturnBuffer<Object>, OptionsWithSchemaAndSingleSheet {
 }
 
-interface WithSchemaOptionsMultipleSheetsReturnBuffer<Object> extends WithSchemaCommonOptionsReturnBuffer<Object>, OptionsSchemaImagesSheets {
+interface WithSchemaOptionsMultipleSheetsReturnBuffer<Object> extends WithSchemaCommonOptionsReturnBuffer<Object>, OptionsWithSchemaAndMultipleSheets {
 }
 
-interface WithSchemaOptionsReturnStream<Object> extends WithSchemaCommonOptionsReturnStream<Object>, OptionsSchemaImagesSheet {
+interface WithSchemaOptionsReturnStream<Object> extends WithSchemaCommonOptionsReturnStream<Object>, OptionsWithSchemaAndSingleSheet {
 }
 
-interface WithSchemaOptionsMultipleSheetsReturnStream<Object> extends WithSchemaCommonOptionsReturnStream<Object>, OptionsSchemaImagesSheets {
+interface WithSchemaOptionsMultipleSheetsReturnStream<Object> extends WithSchemaCommonOptionsReturnStream<Object>, OptionsWithSchemaAndMultipleSheets {
 }
 
 // With `schema`.
@@ -106,34 +106,34 @@ interface WithoutSchemaCommonOptionsReturnBuffer extends CommonOptions {
 interface WithoutSchemaCommonOptionsReturnStream extends CommonOptions {
 }
 
-interface OptionsColumnsImagesSheet {
+interface OptionsWithoutSchemaSingleSheet {
 	columns?: Columns;
   images?: Image[];
 	sheet?: string;
 }
 
-interface OptionsColumnsImagesSheets {
+interface OptionsWithoutSchemaMultipleSheets {
 	columns?: Columns[];
   images?: Image[][];
 	sheets?: string[];
 }
 
-interface WithoutSchemaOptionsWriteToFile extends WithoutSchemaCommonOptionsWriteToFile, OptionsColumnsImagesSheet {
+interface WithoutSchemaOptionsWriteToFile extends WithoutSchemaCommonOptionsWriteToFile, OptionsWithoutSchemaSingleSheet {
 }
 
-interface WithoutSchemaOptionsMultipleSheetsWriteToFile extends WithoutSchemaCommonOptionsWriteToFile, OptionsColumnsImagesSheets {
+interface WithoutSchemaOptionsMultipleSheetsWriteToFile extends WithoutSchemaCommonOptionsWriteToFile, OptionsWithoutSchemaMultipleSheets {
 }
 
-interface WithoutSchemaOptionsReturnBuffer extends WithoutSchemaCommonOptionsReturnBuffer, OptionsColumnsImagesSheet {
+interface WithoutSchemaOptionsReturnBuffer extends WithoutSchemaCommonOptionsReturnBuffer, OptionsWithoutSchemaSingleSheet {
 }
 
-interface WithoutSchemaOptionsMultipleSheetsReturnBuffer extends WithoutSchemaCommonOptionsReturnBuffer, OptionsColumnsImagesSheets {
+interface WithoutSchemaOptionsMultipleSheetsReturnBuffer extends WithoutSchemaCommonOptionsReturnBuffer, OptionsWithoutSchemaMultipleSheets {
 }
 
-interface WithoutSchemaOptionsReturnStream extends WithoutSchemaCommonOptionsReturnStream, OptionsColumnsImagesSheet {
+interface WithoutSchemaOptionsReturnStream extends WithoutSchemaCommonOptionsReturnStream, OptionsWithoutSchemaSingleSheet {
 }
 
-interface WithoutSchemaOptionsMultipleSheetsReturnStream extends WithoutSchemaCommonOptionsReturnStream, OptionsColumnsImagesSheets {
+interface WithoutSchemaOptionsMultipleSheetsReturnStream extends WithoutSchemaCommonOptionsReturnStream, OptionsWithoutSchemaMultipleSheets {
 }
 
 // Write to a file.

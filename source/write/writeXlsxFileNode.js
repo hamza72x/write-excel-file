@@ -8,7 +8,7 @@ import getImageFileName from './getImageFileName.js'
 
 import generateWorkbookXml from './files/workbook.xml.js'
 import generateWorkbookXmlRels from './files/workbook.xml.rels.js'
-import rels from './files/rels.js'
+import relsXml from './files/rels.js'
 import generateContentTypesXml from './files/[Content_Types].xml.js'
 import generateDrawingXml from './files/drawing.xml.js'
 import generateDrawingXmlRels from './files/drawing.xml.rels.js'
@@ -16,54 +16,35 @@ import generateSheetXmlRels from './files/sheet.xml.rels.js'
 import generateSharedStringsXml from './files/sharedStrings.xml.js'
 import generateStylesXml from './files/styles.xml.js'
 
-import { generateSheets } from './writeXlsxFile.common.js'
+import getFeatures from './getFeatures.js'
+import generateSheets from './generateSheets.js'
+
+import {
+	getSheetsParameters,
+	getContentTypesParameters,
+	getWorkbookParameters
+} from './parameters.js'
 
 // This function doesn't use `async`/`await` in order to avoid adding `@babel/runtime` to `dependencies`.
 // https://gitlab.com/catamphetamine/write-excel-file/-/issues/105
 export default function writeXlsxFile(data, {
 	filePath,
 	buffer,
-	sheet: sheetName,
-	sheets: sheetNames,
-	schema,
-	columns,
-	images,
-	headerStyle,
-	getHeaderStyle,
-	fontFamily,
-	fontSize,
-	orientation,
-	stickyRowsCount,
-	stickyColumnsCount,
-	showGridLines,
-	rightToLeft,
-	dateFormat
+	features: customFeatures,
+	...parameters
 } = {}) {
+	const features = getFeatures(customFeatures)
+
 	const {
 		sheets,
 		getSharedStrings,
-		getStyles
-	} = generateSheets({
-		data,
-		sheetName,
-		sheetNames,
-		schema,
-		columns,
-		images,
-		headerStyle,
-		getHeaderStyle,
-		fontFamily,
-		fontSize,
-		orientation,
-		stickyRowsCount,
-		stickyColumnsCount,
-		showGridLines,
-		rightToLeft,
-		dateFormat
-	})
+		getStyles,
+		multipleSheetsParameters
+	} = generateSheets(getSheetsParameters(parameters, data, features))
 
 	return createDirectories().then(({
 		rootPath,
+		globalRelsPath,
 		xlPath,
 		mediaPath,
 		drawingsPath,
@@ -72,11 +53,15 @@ export default function writeXlsxFile(data, {
 		worksheetsPath,
 		worksheetsRelsPath
 	}) => {
+		const contentTypesXmlPath = path.join(rootPath, '[Content_Types].xml')
+
 		const promises = [
+			writeFile(contentTypesXmlPath, generateContentTypesXml({ sheets, ...getContentTypesParameters(parameters) })),
+			writeFile(path.join(globalRelsPath, '.rels'), relsXml),
 			writeFile(path.join(relsPath, 'workbook.xml.rels'), generateWorkbookXmlRels({ sheets })),
-			writeFile(path.join(xlPath, 'workbook.xml'), generateWorkbookXml({ sheets, stickyRowsCount, stickyColumnsCount })),
-			writeFile(path.join(xlPath, 'styles.xml'), generateStylesXml(getStyles())),
-			writeFile(path.join(xlPath, 'sharedStrings.xml'), generateSharedStringsXml(getSharedStrings()))
+			writeFile(path.join(xlPath, 'workbook.xml'), generateWorkbookXml({ sheets, ...getWorkbookParameters(parameters) })),
+			writeFile(path.join(xlPath, 'styles.xml'), generateStylesXml(getStyles(), multipleSheetsParameters, features)),
+			writeFile(path.join(xlPath, 'sharedStrings.xml'), generateSharedStringsXml(getSharedStrings())),
 		]
 
 		for (const { id, data, images } of sheets) {
@@ -96,9 +81,9 @@ export default function writeXlsxFile(data, {
 
 		return Promise.all(promises).then(() => {
 			const archive = createArchive(filePath, {
-				sheets,
-				images,
-				xlDirectoryPath: xlPath
+				xlDirectoryPath: xlPath,
+				globalRelsDirectoryPath: globalRelsPath,
+				contentTypesXmlPath
 			});
 
 			if (filePath) {
@@ -121,9 +106,9 @@ export default function writeXlsxFile(data, {
 
 // Creates a `*.zip` archive from Excel data and returns a readable `Stream`.
 function createArchive(outputFilePath, {
-	sheets,
-	images,
-	xlDirectoryPath
+	xlDirectoryPath,
+	globalRelsDirectoryPath,
+	contentTypesXmlPath
 }) {
 	// I dunno why `Archive` class is used here instead of something like `JSZip`.
 	// `JSZip` is already used in `writeXlsxFileBrowser.js`, so maybe it would've also fit here.
@@ -131,10 +116,8 @@ function createArchive(outputFilePath, {
 	const archive = new Archive(outputFilePath)
 
 	archive.directory(xlDirectoryPath, 'xl')
-
-	archive.append(rels, '_rels/.rels')
-
-	archive.append(generateContentTypesXml({ sheets, images }), '[Content_Types].xml')
+	archive.directory(globalRelsDirectoryPath, '_rels')
+	archive.file(contentTypesXmlPath, '[Content_Types].xml')
 
 	archive.write()
 
@@ -266,6 +249,7 @@ function createDirectories() {
 	// in `archiver` library, hence using a hacky temporary directory workaround.
 	// https://www.npmjs.com/package/archiver
 	return createTempDirectory().then((rootPath) => {
+		const globalRelsPath = path.join(rootPath, '_rels')
 		const xlPath = path.join(rootPath, 'xl')
 		const mediaPath = path.join(xlPath, 'media')
 		const drawingsPath = path.join(xlPath, 'drawings')
@@ -275,6 +259,7 @@ function createDirectories() {
 		const worksheetsRelsPath = path.join(worksheetsPath, '_rels')
 
 		const directories = [
+			globalRelsPath,
 			xlPath,
 			mediaPath,
 			drawingsPath,
@@ -291,6 +276,7 @@ function createDirectories() {
 		return createAllDirectoriesPromise.then(() => {
 			return {
 				rootPath,
+				globalRelsPath,
 				xlPath,
 				mediaPath,
 				drawingsPath,

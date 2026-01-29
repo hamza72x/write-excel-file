@@ -12,6 +12,7 @@ export default function generateRow(row, rowIndex, {
 	getSharedString,
 	customFont,
 	dateFormat,
+	features,
 	usesSchema
 }) {
 	// To ensure the row number starts as in Excel.
@@ -27,7 +28,7 @@ export default function generateRow(row, rowIndex, {
 				height
 			} = cell
 
-			const cellStyleProperties = getCellStyleProperties(cell)
+			const cellStyleProperties = getCellStyleProperties(cell, features)
 
 			let {
 				type,
