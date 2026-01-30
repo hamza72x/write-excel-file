@@ -1,7 +1,7 @@
 import $attr from '../../xml/sanitizeAttributeValue.js'
-import { getFillXml } from '../helpers/fill.js'
-import { getBorderXml } from '../helpers/border.js'
-import getXlsxColorForHexColor from '../helpers/getXlsxColorForHexColor.js'
+import getFillXml from '../helpers/getFillXml.js'
+import getBorderXml from '../helpers/getBorderXml.js'
+import getFontXml from '../helpers/getFontXml.js'
 
 import { FORMAT_ID_STARTS_FROM } from '../initializeStyles.js'
 
@@ -37,47 +37,7 @@ export default function generateStylesXml(parameters, multipleSheetsParameters, 
 
   xml += `<fonts count="${fonts.length}">`
   for (const font of fonts) {
-    const {
-      size,
-      family,
-      color,
-      weight,
-      style,
-      custom
-    } = font
-    xml += '<font>'
-    xml += `<sz val="${size}"/>`
-    xml += `<color ${color ? 'rgb="' + $attr(getXlsxColorForHexColor(color)) + '"' : 'theme="1"'}/>`
-    xml += `<name val="${$attr(family)}"/>`
-    // It's not clear what the `<family/>` tag means or does.
-    // It seems to always be `<family val="2"/>` even for different
-    // font families (Calibri, Arial, etc).
-    xml += '<family val="2"/>'
-    //
-    // It's not clear what the `<scheme/>` tag means or does.
-    // Seems like it's only preset for the default "Calibri" font.
-    // Adding it to any other font resets the font family in Microsoft Excel 2007.
-    //
-    // "Defines the font scheme, if any, to which this font belongs.
-    //  When a font definition is part of a theme definition, then the font
-    //  is categorized as either a "major" or "minor" font scheme component.
-    //  When a new theme is chosen, every font that is part of a theme definition
-    //  is updated to use the new "major" or "minor" font definition for that theme.
-    //  Usually "major" fonts are used for styles like headings,
-    //  and "minor" fonts are used for body and paragraph text."
-    //
-    // https://hackage.haskell.org/package/xlsx-0.8.4/docs/Codec-Xlsx-Types-StyleSheet.html
-    //
-    if (!custom) {
-      xml += '<scheme val="minor"/>'
-    }
-    if (weight === 'bold') {
-      xml += '<b/>'
-    }
-    if (style === 'italic') {
-      xml += '<i/>'
-    }
-    xml += '</font>'
+    xml += getFontXml(font)
   }
   xml += '</fonts>'
 

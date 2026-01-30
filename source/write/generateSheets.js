@@ -15,7 +15,7 @@ export default function generateSheets({
 }) {
   const { getSharedStrings, getSharedString } = initializeSharedStrings()
 
-  const { getStyles, getStyle } = initializeStyles({
+  const { getStyles, getStyleId } = initializeStyles({
     fontFamily,
     fontSize,
     features,
@@ -63,7 +63,7 @@ export default function generateSheets({
       images: images && getParameterForSheet(images),
       customFont: fontFamily || fontSize,
       getHeaderStyle,
-      getStyle,
+      getStyleId,
       getSharedString
     }, features))
     sheetIndex++

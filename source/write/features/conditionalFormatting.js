@@ -1,9 +1,11 @@
 import escapeXmlCharacters from '../../xml/escapeXmlCharacters.js'
-import $attr from '../../xml/sanitizeAttributeValue.js'
 
-import { hasFill, getFillXml } from '../helpers/fill.js'
-import { getBorderXml } from '../helpers/border.js'
-import getXlsxColorForHexColor from '../helpers/getXlsxColorForHexColor.js'
+import hasFill from '../helpers/hasFill.js'
+import getFillXml from '../helpers/getFillXml.js'
+import hasBorder from '../helpers/hasBorder.js'
+import getBorderXml from '../helpers/getBorderXml.js'
+import hasFont from '../helpers/hasFont.js'
+import getFontXml from '../helpers/getFontXml.js'
 import getCellCoordinate from '../helpers/getCellCoordinate.js'
 
 export default {
@@ -196,26 +198,15 @@ function getConditionalFormattingStylesXml({ conditionalFormattingPerSheet }) {
 
 			xml += '<dxf>'
 
-			if (fontWeight || fontStyle || textColor || textDecoration) {
-				xml += '<font>'
+			const font = {
+				fontWeight,
+				fontStyle,
+				textDecoration,
+				textColor
+			}
 
-				if (fontWeight === 'bold') {
-					xml += '<b/>'
-				} else if (fontStyle === 'italic') {
-					xml += '<i/>'
-				} else if (textDecoration === 'strikethrough') {
-					xml += '<strike/>'
-				} else if (textDecoration === 'underline') {
-					xml += '<u/>'
-				} else if (textDecoration === 'double-underline') {
-					xml += '<u val="double"/>'
-				}
-
-				if (textColor) {
-					xml += `<color rgb="${$attr(getXlsxColorForHexColor(textColor))}"/>`
-				}
-
-				xml += '</font>'
+			if (hasFont(font)) {
+				xml += getFontXml(font)
 			}
 
 			const fill = {
@@ -223,40 +214,26 @@ function getConditionalFormattingStylesXml({ conditionalFormattingPerSheet }) {
 				fillPatternStyle,
 				fillPatternColor
 			}
+
 			if (hasFill(fill)) {
-				xml += getFillXml(fill)
+				xml += getFillXml(fill, { conditionalFormatting: true })
 			}
 
-			if (
-				borderColor ||
-				borderStyle ||
-				leftBorderColor ||
-				leftBorderStyle ||
-				rightBorderColor ||
-				rightBorderStyle ||
-				topBorderColor ||
-				topBorderStyle ||
-				bottomBorderColor ||
+			const border = {
+				borderColor,
+				borderStyle,
+				leftBorderColor,
+				leftBorderStyle,
+				rightBorderColor,
+				rightBorderStyle,
+				topBorderColor,
+				topBorderStyle,
+				bottomBorderColor,
 				bottomBorderStyle
-			) {
-				xml += getBorderXml({
-          left: {
-            style: leftBorderStyle || borderStyle,
-            color: leftBorderColor || borderColor
-          },
-          right: {
-            style: rightBorderStyle || borderStyle,
-            color: rightBorderColor || borderColor
-          },
-          top: {
-            style: topBorderStyle || borderStyle,
-            color: topBorderColor || borderColor
-          },
-          bottom: {
-            style: bottomBorderStyle || borderStyle,
-            color: bottomBorderColor || borderColor
-          }
-				})
+			}
+
+			if (hasBorder(border)) {
+				xml += getBorderXml(border)
 			}
 
 			xml += '</dxf>'

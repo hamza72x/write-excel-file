@@ -1,9 +1,23 @@
 import { CommonStyleProperties } from '../common.d.js'
 
+interface TextDecorationProperties {
+	strikethrough?: boolean;
+}
+
+interface TextDecorationPropertiesWithSingleUnderline extends TextDecorationProperties {
+	underline: true;
+}
+
+interface TextDecorationPropertiesWithDoubleUnderline extends TextDecorationProperties {
+	doubleUnderline: true;
+}
+
 type TextDecoration =
-	'strikethrough' |
-	'underline' |
-	'double-underline'
+	TextDecorationProperties |
+	TextDecorationPropertiesWithSingleUnderline |
+	TextDecorationPropertiesWithDoubleUnderline
+
+type TextStyle = 'subscript' | superscript
 
 interface ConditionalFormattingConditionWithFormula {
 	formula: string;

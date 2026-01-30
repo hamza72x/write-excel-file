@@ -8,7 +8,7 @@ import getAttributesString from '../../../xml/getAttributesString.js'
 // import Integer from '../types/Integer.js'
 
 export default function generateRow(row, rowIndex, {
-	getStyle,
+	getStyleId,
 	getSharedString,
 	customFont,
 	dateFormat,
@@ -72,7 +72,7 @@ export default function generateRow(row, rowIndex, {
 				customFont ||
 				cellStyleProperties
 			) {
-				cellStyleId = getStyle(cellStyleProperties || {}, { format })
+				cellStyleId = getStyleId(cellStyleProperties || {}, { format })
 			}
 
 			if (height) {

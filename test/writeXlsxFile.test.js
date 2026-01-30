@@ -214,6 +214,7 @@ describe('writeXlsxFile', function() {
 
     await writeXlsxFile(data, { columns, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells.xlsx') })
     await writeXlsxFile(data, { columns, rightToLeft: true, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-right-to-left.xlsx') })
+    await writeXlsxFile(data, { columns, fontFamily: 'Times New Roman', fontSize: 16, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-custom-default-font.xlsx') })
     await writeXlsxFile(dataWithCustomFontInFirstCell, { columns, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-custom-font.xlsx') })
     await writeXlsxFile(dataWithTextRotation, { columns, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-text-rotation.xlsx') })
     await writeXlsxFile(data, { columns, stickyRowsCount: 1, filePath: path.join(OUTPUT_DIRECTORY, 'test-cells-sticky-row.xlsx') })
@@ -246,7 +247,11 @@ describe('writeXlsxFile', function() {
           value: 200
         },
         style: {
-          backgroundColor: '#cc0000'
+          backgroundColor: '#cc0000',
+          fontStyle: 'italic',
+          textDecoration: {
+            underline: true
+          }
         }
       }],
       filePath: path.join(OUTPUT_DIRECTORY, 'test-conditional-formatting.xlsx')

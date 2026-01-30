@@ -1,21 +1,46 @@
 import $attr from '../../xml/sanitizeAttributeValue.js'
 import getXlsxColorForHexColor from './getXlsxColorForHexColor.js'
 
-export function getBorderXml(border) {
-	const {
-		left,
-		right,
-		top,
-		bottom
-	} = border
-	let xml = ''
-	xml += '<border>'
+export default function getBorderXml({
+	borderColor,
+	borderStyle,
+	leftBorderColor,
+	leftBorderStyle,
+	rightBorderColor,
+	rightBorderStyle,
+	topBorderColor,
+	topBorderStyle,
+	bottomBorderColor,
+	bottomBorderStyle
+}) {
+	const left = {
+		style: leftBorderStyle || borderStyle,
+		color: leftBorderColor || borderColor
+	}
+
+	const right = {
+		style: rightBorderStyle || borderStyle,
+		color: rightBorderColor || borderColor
+	}
+
+	const top = {
+		style: topBorderStyle || borderStyle,
+		color: topBorderColor || borderColor
+	}
+
+	const bottom = {
+		style: bottomBorderStyle || borderStyle,
+		color: bottomBorderColor || borderColor
+	}
+
+	let xml = '<border>'
 	xml += getSideBorderXml('left', left)
 	xml += getSideBorderXml('right', right)
 	xml += getSideBorderXml('top', top)
 	xml += getSideBorderXml('bottom', bottom)
 	xml += '<diagonal/>'
 	xml += '</border>'
+
 	return xml
 }
 

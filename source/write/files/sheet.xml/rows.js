@@ -6,7 +6,7 @@ import generateRow from './row.js'
 export default function generateRows(data, {
 	schema,
 	getHeaderStyle,
-	getStyle,
+	getStyleId,
 	getSharedString,
 	customFont,
 	dateFormat,
@@ -38,7 +38,7 @@ export default function generateRows(data, {
 		)))
 	}
 	return data.map((row, index) => generateRow(row, index, {
-		getStyle,
+		getStyleId,
 		getSharedString,
 		customFont,
 		dateFormat,

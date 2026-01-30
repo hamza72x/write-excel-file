@@ -1,3 +1,7 @@
+import hasFont from './helpers/hasFont.js'
+import hasFill from './helpers/hasFill.js'
+import hasBorder from './helpers/hasBorder.js'
+
 // There seem to be about 100 "built-in" formats in Excel.
 // https://docs.microsoft.com/en-us/previous-versions/office/developer/office-2010/ee857658(v=office.14)?redirectedfrom=MSDN
 export const FORMAT_ID_STARTS_FROM = 100
@@ -8,62 +12,54 @@ export default function initializeStyles({
   features,
   ...restParameters
 }) {
-  const customFont = Boolean(defaultFontFamily || defaultFontSize)
-
-  if (defaultFontFamily === undefined) {
-    defaultFontFamily = 'Calibri'
-  }
-
-  if (defaultFontSize === undefined) {
-    defaultFontSize = 12
-  }
-
   const formats = []
-  const formatsIndex = {}
+  const formatIdByFormat = {}
 
   const styles = []
   const stylesIndex = {}
 
   const fonts = []
-  const fontsIndex = {}
+  const fontIdByFontKey = {}
 
   const fills = []
-  const fillsIndex = {}
+  const fillIdByFillKey = {}
 
   const borders = []
-  const bordersIndex = {}
+  const borderIdByBorderKey = {}
 
   // Default font.
-  fonts.push({
-    size: defaultFontSize,
-    family: defaultFontFamily,
-    custom: customFont
-  })
-  fontsIndex['-:-'] = 0
+  const defaultFont = {
+    fontSize: defaultFontSize,
+    fontFamily: defaultFontFamily
+  }
+  const defaultFontId = fonts.length
+  fontIdByFontKey[getFontKey(defaultFont)] = defaultFontId
+  fonts.push(defaultFont)
 
   // Default fill (no color).
-  fills.push({})
-  fillsIndex['-'] = 0
+  const defaultFill = {}
+  fillIdByFillKey[getFillKey(defaultFill)] = fills.length
+  fills.push(defaultFill)
 
   // Default border.
-  borders.push({
-    left: {},
-    right: {},
-    top: {},
-    bottom: {}
-  })
-  bordersIndex['-:-/-:-/-:-/-:-'] = 0
+  const defaultBorder = {}
+  borderIdByBorderKey[getBorderKey(defaultBorder)] = borders.length
+  borders.push(defaultBorder)
 
   // Always add a mandatory "gray125" fill.
   // For some weird reason, MS Office 2007 Excel seems to require this type of `<fill>`
   // to always be present in an `*.xslx` document.
   // Otherwise, if this `<fill>` is absent in the document, it would forcefully overwrite
   // the first custom `backgroundColor` with a "gray125" fill.
-  fills.push({
+  const gray125Fill = {
     gray125: true
-  })
+  }
+  fills.push(gray125Fill)
 
-  function getStyle({
+  // Returns a style ID number.
+  // Adds a new style if it doesn't exist yet.
+  // If it already exists, just reuses the existing one.
+  function getStyleId({
     align,
     alignVertical,
     textRotation,
@@ -91,140 +87,145 @@ export default function initializeStyles({
   }, {
     format
   }) {
-    // Look for an existing style.
-    const fontKey = `${fontFamily || '-'}:${fontSize || '-'}:${fontWeight || '-'}:${fontStyle || '-'}:${textColor || '-'}`
-    const fillKey = `${backgroundColor || '-'}:${fillPatternStyle || '-'}:${fillPatternColor || '-'}`
-    const borderKey =
-      `${(topBorderColor || borderColor) || '-'}:${(topBorderStyle || borderStyle) || '-'}` +
-      '/' +
-      `${(rightBorderColor || borderColor) || '-'}:${(rightBorderStyle || borderStyle) || '-'}` +
-      '/' +
-      `${(bottomBorderColor || borderColor) || '-'}:${(bottomBorderStyle || borderStyle) || '-'}` +
-      '/' +
-      `${(leftBorderColor || borderColor) || '-'}:${(leftBorderStyle || borderStyle) || '-'}`
-
-    let key = `${align || '-'}/${alignVertical || '-'}/${textRotation || '-'}/${indent || '-'}/${wrap || '-'}/${format || '-'}/${fontKey}/${fillKey}/${borderKey}`
-
-    // Apply any plugins that add custom styling.
-    for (const feature of features) {
-      if (feature.transforms && feature.transforms.style) {
-        key = feature.transforms.style.transformKey(key, restParameters)
-      }
+    const font = {
+      fontFamily,
+      fontSize,
+      fontWeight,
+      fontStyle,
+      textColor
     }
 
-    const styleId = stylesIndex[key]
-    if (styleId !== undefined) {
+    const fill = {
+      backgroundColor,
+      fillPatternStyle,
+      fillPatternColor
+    }
+
+    const border = {
+      borderColor,
+      borderStyle,
+      leftBorderColor,
+      leftBorderStyle,
+      rightBorderColor,
+      rightBorderStyle,
+      topBorderColor,
+      topBorderStyle,
+      bottomBorderColor,
+      bottomBorderStyle
+    }
+
+    const fontKey = getFontKey(font)
+    const fillKey = getFillKey(fill)
+    const borderKey = getBorderKey(border)
+
+    const getStyleKey = () => {
+      return `${align || '-'}/${alignVertical || '-'}/${textRotation || '-'}/${indent || '-'}/${wrap || '-'}/${format || '-'}/${fontKey}/${fillKey}/${borderKey}`
+    }
+
+    // Returns style ID.
+    const addStyle = () => {
+      // Get format ID.
+      let formatId
+      if (format) {
+        formatId = formatIdByFormat[format]
+        if (formatId === undefined) {
+          formatId = FORMAT_ID_STARTS_FROM + formats.length
+          formatIdByFormat[format] = formatId
+          formats.push(format)
+        }
+      }
+
+      // Get font ID.
+      let fontId
+      if (hasFont(font)) {
+        fontId = fontIdByFontKey[fontKey]
+        if (fontId === undefined) {
+          fontId = fonts.length
+          fontIdByFontKey[fontKey] = fontId
+          fonts.push({
+            ...font,
+            fontSize: font.fontSize || defaultFontSize,
+            fontFamily: font.fontFamily || defaultFontFamily
+          })
+        }
+      } else if (hasFont(defaultFont)) {
+        fontId = defaultFontId
+      }
+
+      // Get fill ID.
+      let fillId
+      if (hasFill(fill)) {
+        fillId = fillIdByFillKey[fillKey]
+        if (fillId === undefined) {
+          fillId = fills.length
+          fillIdByFillKey[fillKey] = fillId
+          fills.push({
+            backgroundColor,
+            fillPatternStyle,
+            fillPatternColor
+          })
+        }
+      }
+
+      // Get border ID.
+      let borderId
+      if (hasBorder(border)) {
+        borderId = borderIdByBorderKey[borderKey]
+        if (borderId === undefined) {
+          borderId = borders.length
+          borderIdByBorderKey[borderKey] = borderId
+          borders.push(border)
+        }
+      }
+
+      // Apply any plugins that add custom styling.
+      const customStyleProperties = {}
+      for (const feature of features) {
+        if (feature.transforms && feature.transforms.style) {
+          customStyleProperties = feature.transforms.style.transform(customStyleProperties, restParameters)
+        }
+      }
+
+      const styleId = styles.length
+      stylesIndex[styleKey] = styleId
+
+      // Add a style.
+      styles.push({
+        ...customStyleProperties,
+        formatId,
+        fontId,
+        fillId,
+        borderId,
+        align,
+        alignVertical,
+        textRotation,
+        indent,
+        wrap
+      })
+
       return styleId
     }
 
-    // Create new style.
-
-    // Get format ID.
-    let formatId
-    if (format) {
-      formatId = formatsIndex[format]
-      if (formatId === undefined) {
-        formatId = formatsIndex[format] = String(FORMAT_ID_STARTS_FROM + formats.length)
-        formats.push(format)
-      }
-    }
-
-    // Get font ID.
-    let fontId = customFont ? 0 : undefined
-    if (fontFamily || fontSize || fontWeight || fontStyle || textColor) {
-      fontId = fontsIndex[fontKey]
-      if (fontId === undefined) {
-        fontId = fontsIndex[fontKey] = String(fonts.length)
-        fonts.push({
-          custom: true,
-          size: fontSize || defaultFontSize,
-          family: fontFamily || defaultFontFamily,
-          weight: fontWeight,
-          style: fontStyle,
-          color: textColor
-        })
-      }
-    }
-
-    // Get fill ID.
-    let fillId
-    if (backgroundColor || fillPatternStyle || fillPatternColor) {
-      fillId = fillsIndex[fillKey]
-      if (fillId === undefined) {
-        fillId = fillsIndex[fillKey] = String(fills.length)
-        fills.push({
-          backgroundColor,
-          fillPatternStyle,
-          fillPatternColor
-        })
-      }
-    }
-
-    // Get border ID.
-    let borderId
-    if (
-      borderColor ||
-      borderStyle ||
-      leftBorderColor ||
-      leftBorderStyle ||
-      rightBorderColor ||
-      rightBorderStyle ||
-      topBorderColor ||
-      topBorderStyle ||
-      bottomBorderColor ||
-      bottomBorderStyle
-    ) {
-      borderId = bordersIndex[borderKey]
-      if (borderId === undefined) {
-        borderId = bordersIndex[borderKey] = String(borders.length)
-        borders.push({
-          left: {
-            style: leftBorderStyle || borderStyle,
-            color: leftBorderColor || borderColor
-          },
-          right: {
-            style: rightBorderStyle || borderStyle,
-            color: rightBorderColor || borderColor
-          },
-          top: {
-            style: topBorderStyle || borderStyle,
-            color: topBorderColor || borderColor
-          },
-          bottom: {
-            style: bottomBorderStyle || borderStyle,
-            color: bottomBorderColor || borderColor
-          }
-        })
-      }
-    }
+    let styleKey = getStyleKey()
 
     // Apply any plugins that add custom styling.
-    const customStyleProperties = {}
     for (const feature of features) {
       if (feature.transforms && feature.transforms.style) {
-        customStyleProperties = feature.transforms.style.transform(customStyleProperties, restParameters)
+        styleKey = feature.transforms.style.transformKey(styleKey, restParameters)
       }
     }
 
-    // Add a style.
-    styles.push({
-      ...customStyleProperties,
-      fontId,
-      fillId,
-      borderId,
-      align,
-      alignVertical,
-      textRotation,
-      indent,
-      wrap,
-      formatId
-    })
+    // Look for an existing style.
+    if (stylesIndex[styleKey] !== undefined) {
+      return stylesIndex[styleKey]
+    }
 
-    return stylesIndex[key] = String(styles.length - 1)
+    // Create new style if doesn't exist.
+    return addStyle()
   }
 
   // Add the default style.
-  getStyle({}, {})
+  getStyleId({}, {})
 
   return {
     getStyles() {
@@ -237,6 +238,45 @@ export default function initializeStyles({
         ...restParameters
       }
     },
-    getStyle
+    getStyleId
   }
+}
+
+function getFontKey({
+  fontFamily,
+  fontSize,
+  fontWeight,
+  fontStyle,
+  textColor
+}) {
+  return `${fontFamily || '-'}:${fontSize || '-'}:${fontWeight || '-'}:${fontStyle || '-'}:${textColor || '-'}`
+}
+
+function getFillKey({
+  backgroundColor,
+  fillPatternStyle,
+  fillPatternColor
+}) {
+  return `${backgroundColor || '-'}:${fillPatternStyle || '-'}:${fillPatternColor || '-'}`
+}
+
+function getBorderKey({
+  borderColor,
+  borderStyle,
+  leftBorderColor,
+  leftBorderStyle,
+  rightBorderColor,
+  rightBorderStyle,
+  topBorderColor,
+  topBorderStyle,
+  bottomBorderColor,
+  bottomBorderStyle
+}) {
+  return `${(topBorderColor || borderColor) || '-'}:${(topBorderStyle || borderStyle) || '-'}` +
+    '/' +
+    `${(rightBorderColor || borderColor) || '-'}:${(rightBorderStyle || borderStyle) || '-'}` +
+    '/' +
+    `${(bottomBorderColor || borderColor) || '-'}:${(bottomBorderStyle || borderStyle) || '-'}` +
+    '/' +
+    `${(leftBorderColor || borderColor) || '-'}:${(leftBorderStyle || borderStyle) || '-'}`
 }

@@ -19,7 +19,7 @@ export default function generateSheetXml(data_, parameters, features) {
 		columns,
 		images,
 		getHeaderStyle,
-		getStyle,
+		getStyleId,
 		getSharedString,
 		customFont,
 		dateFormat,
@@ -40,7 +40,7 @@ export default function generateSheetXml(data_, parameters, features) {
   	.replace('{data}', generateRows(data, {
   		schema,
   		getHeaderStyle,
-  		getStyle,
+  		getStyleId,
   		getSharedString,
   		customFont,
 			features,

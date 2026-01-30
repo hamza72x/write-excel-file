@@ -20,7 +20,7 @@ export default function generateCell(
   // if they don't have a style applied to them,
   // like border or background color.
   if (value === null) {
-    if (!cellStyleId) {
+    if (cellStyleId === undefined) {
       return ''
     }
   }
@@ -33,9 +33,9 @@ export default function generateCell(
   // https://xlsxwriter.readthedocs.io/format.html#format-set-num-format
   // `2` — 0.00
   // `3` —  #,##0
-  if (cellStyleId) {
+  if (cellStyleId !== undefined) {
     // From the attribute s="12" we know that the cell's formatting is stored at the 13th (zero-based index) <xf> within the <cellXfs>
-    cellAttributes.s = cellStyleId
+    cellAttributes.s = String(cellStyleId)
   }
 
   if (value === null) {
@@ -43,7 +43,7 @@ export default function generateCell(
   }
 
   // Validate date format.
-  if (type === Date && !cellStyleId) {
+  if (type === Date && cellStyleId === undefined) {
     throw new Error('No "format" has been specified for a Date cell')
   }
 
