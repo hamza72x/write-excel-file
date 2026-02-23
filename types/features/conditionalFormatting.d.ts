@@ -1,24 +1,5 @@
 import { CommonStyleProperties } from '../common.d.js'
 
-interface TextDecorationProperties {
-	strikethrough?: boolean;
-}
-
-interface TextDecorationPropertiesWithSingleUnderline extends TextDecorationProperties {
-	underline: true;
-}
-
-interface TextDecorationPropertiesWithDoubleUnderline extends TextDecorationProperties {
-	doubleUnderline: true;
-}
-
-type TextDecoration =
-	TextDecorationProperties |
-	TextDecorationPropertiesWithSingleUnderline |
-	TextDecorationPropertiesWithDoubleUnderline
-
-type TextStyle = 'subscript' | superscript
-
 interface ConditionalFormattingConditionWithFormula {
 	formula: string;
 }
@@ -60,12 +41,10 @@ export type ConditionalFormattingCondition =
 	ConditionalFormattingConditionWithOperatorAndOneNumericValue |
 	ConditionalFormattingConditionWithOperatorAndTwoNumericValues
 
-interface ConditionalFormattingStyle extends CommonStyleProperties {
-	textDecoration?: TextDecoration;
-}
+interface ConditionalFormattingStyle extends CommonStyleProperties {}
 
 export interface ConditionalFormatting {
-	cells: {
+	cellRange: {
 		from: {
 			row: number,
 			column: number

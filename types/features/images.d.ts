@@ -1,14 +1,14 @@
-export interface ImagesParametersSingleSheet<Image> {
-  images?: Image[];
+export interface ImagesParametersSingleSheet<FileContent> {
+  images?: ImageType<FileContent>[];
 }
 
-export interface ImagesParametersMultipleSheets<Image> {
-  images?: Image[][];
+export interface ImagesParametersMultipleSheets<FileContent> {
+  images?: ImageType<FileContent>[][];
 }
 
 // `ImageContent` will differ between server side and client side.
-export interface ImageType<ImageContent> {
-	content: ImageContent;
+export interface ImageType<FileContent> {
+	content: FileContent;
 	contentType: string;
 	width: number;
 	height: number;

@@ -38,9 +38,29 @@ type BorderStyle =
 	'double' |
 	'thick';
 
+interface TextDecorationProperties {
+	strikethrough?: boolean;
+}
+
+interface TextDecorationPropertiesWithSingleUnderline extends TextDecorationProperties {
+	underline: true;
+}
+
+interface TextDecorationPropertiesWithDoubleUnderline extends TextDecorationProperties {
+	doubleUnderline: true;
+}
+
+type TextDecoration =
+	TextDecorationProperties |
+	TextDecorationPropertiesWithSingleUnderline |
+	TextDecorationPropertiesWithDoubleUnderline
+
 export interface CommonStyleProperties {
+	fontFamily?: string;
+	fontSize?: number;
 	fontWeight?: FontWeight;
 	fontStyle?: FontStyle;
+	textDecoration?: TextDecoration;
 	textColor?: Color;
 	backgroundColor?: Color;
 	fillPatternStyle?: FillPatternStyle;
