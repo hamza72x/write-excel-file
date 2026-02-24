@@ -24,7 +24,7 @@ Example:
 const data = [
   ['A','B','C'],
   ['x',123,true],
-  ['y',456,false],
+  ['y',456,false]
 ]
 ```
 
