@@ -1,11 +1,14 @@
-import writeXlsxFileBrowser from '../browser/index.js'
-import writeXlsxFileBrowserCommonJs from '../browser/index.cjs'
+import { describe, it } from 'mocha'
+import { expect } from 'chai'
 
-import writeXlsxFileUniversal from '../universal/index.js'
-import writeXlsxFileUniversalCommonJs from '../universal/index.cjs'
+import writeXlsxFileBrowser from '../../browser/index.js'
+import writeXlsxFileBrowserCommonJs from '../../browser/index.cjs'
 
-import writeXlsxFileNode from '../node/index.js'
-import writeXlsxFileNodeCommonJs from '../node/index.cjs'
+import writeXlsxFileUniversal from '../../universal/index.js'
+import writeXlsxFileUniversalCommonJs from '../../universal/index.cjs'
+
+import writeXlsxFileNode from '../../node/index.js'
+import writeXlsxFileNodeCommonJs from '../../node/index.cjs'
 
 describe('/browser', () => {
 	it('should export ESM', () => {
