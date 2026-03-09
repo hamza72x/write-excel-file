@@ -1,11 +1,11 @@
 /**
- * Escapes text for XML: replaces ">" with "&gt;", etc.
+ * Escapes a string for including it in XML markup: replaces ">" with "&gt;", etc.
  * https://en.wikipedia.org/wiki/Character_encodings_in_HTML#HTML_character_references
  * @param  {string} string
- * @param  {boolean} [options.attribute]
+ * @param  {boolean} options.isAttributeValue — Pass `true` if an XML attribute value is being escaped. Pass `false` otherwise.
  * @return {string}
  */
-export default function escapeXmlCharacters(string, { attribute }) {
+export default function escapeXmlCharacters(string, { isAttributeValue }) {
 	// By default, "&", "<" and ">" characters should be escaped:
 	//
 	// The ampersand character (&) and the left angle bracket (<) must not appear
@@ -24,7 +24,7 @@ export default function escapeXmlCharacters(string, { attribute }) {
 
 	// Additionally, in attribute values, single and double quotes might be required
 	// to be escaped depending on what character is used for delimiting those attribute values.
-	if (attribute) {
+	if (isAttributeValue) {
 		string = string
 			.replace(SINGLE_QUOTE_REGEXP, '&apos;')
 			.replace(DOUBLE_QUOTE_REGEXP, '&quot;')
