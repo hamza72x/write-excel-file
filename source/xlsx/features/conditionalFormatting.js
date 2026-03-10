@@ -1,4 +1,4 @@
-import sanitizeTextContent from '../../xml/sanitizeTextContent.js'
+import escapeTextContent from '../../xml/escapeTextContent.js'
 
 import hasFill from '../helpers/hasFill.js'
 import getFillXml from '../helpers/getFillXml.js'
@@ -110,13 +110,13 @@ function getConditionalFormattingRulesXml({
 
 		if (formula) {
 			xml += `<cfRule type="expression" dxfId="${dxfId}" priority="${priority}">`
-			xml += `<formula>${sanitizeTextContent(formula)}</formula>`
+			xml += `<formula>${escapeTextContent(formula)}</formula>`
 			xml += '</cfRule>'
 		} else if (operator) {
 			xml += `<cfRule type="cellIs" operator="${getXlsxOperatorName(operator)}" dxfId="${dxfId}" priority="${priority}">`
-			xml += `<formula>${sanitizeTextContent(formatValue(value))}</formula>`
+			xml += `<formula>${escapeTextContent(formatValue(value))}</formula>`
 			if (getXlsxOperatorName(operator) === 'between') {
-				xml += `<formula>${sanitizeTextContent(formatValue(value2))}</formula>`
+				xml += `<formula>${escapeTextContent(formatValue(value2))}</formula>`
 			}
 			xml += '</cfRule>'
 		} else {

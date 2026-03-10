@@ -5,7 +5,7 @@
  * @param  {boolean} options.isAttributeValue — Pass `true` if an XML attribute value is being escaped. Pass `false` otherwise.
  * @return {string}
  */
-export default function escapeXmlCharacters(string, { isAttributeValue }) {
+export default function escapeXmlSpecialCharacters(string, { isAttributeValue }) {
 	// By default, "&", "<" and ">" characters should be escaped:
 	//
 	// The ampersand character (&) and the left angle bracket (<) must not appear
@@ -17,24 +17,33 @@ export default function escapeXmlCharacters(string, { isAttributeValue }) {
 	// " > " or a character reference when it appears in the string " ]]> " in content,
 	// when that string is not marking the end of a CDATA section.
 	//
-	string = string
-		.replace(AMPERSAND_REGEXP, '&amp;')
-		.replace(GREATER_THAN_REGEXP, '&gt;')
-		.replace(LESS_THAN_REGEXP, '&lt;')
+	string = replaceAll(string, '&', '&amp;')
+	string = replaceAll(string, '>', '&gt;')
+	string = replaceAll(string, '<', '&lt;')
 
 	// Additionally, in attribute values, single and double quotes might be required
 	// to be escaped depending on what character is used for delimiting those attribute values.
 	if (isAttributeValue) {
-		string = string
-			.replace(SINGLE_QUOTE_REGEXP, '&apos;')
-			.replace(DOUBLE_QUOTE_REGEXP, '&quot;')
+		string = replaceAll(string, '\'', '&apos;')
+		string = replaceAll(string, '"', '&quot;')
 	}
 
 	return string
 }
 
-const AMPERSAND_REGEXP = /&/g
-const GREATER_THAN_REGEXP = />/g
-const LESS_THAN_REGEXP = /</g
-const SINGLE_QUOTE_REGEXP = /'/g
-const DOUBLE_QUOTE_REGEXP = /"/g
+function replaceAll(string, replacedSubstring, replacementSubstring) {
+	if (string.replaceAll) {
+		return string.replaceAll(replacedSubstring, replacementSubstring)
+	}
+	// There's no need to escape RegExp special characters in `replacedSubstring`
+	// because this function is not exported and is only called internally
+	// with a known subset of possible `replacedSubstring`s which are known
+	// to not contain any RegExp special characters.
+	return string.replace(new RegExp(replacedSubstring, 'g'), replacementSubstring)
+}
+
+// // Escapes any regular-expression-specific special characters.
+// function escapeRegExpSpecialCharacters(string) {
+// 	const specialCharactersRegExp = new RegExp('[.*+?|()\\[\\]{}\\\\]', 'g')
+// 	return string.replace(specialCharactersRegExp, '\\$&')
+// }

@@ -1,5 +1,5 @@
-import sanitizeAttributeName from './sanitizeAttributeName.js'
-import sanitizeAttributeValue from './sanitizeAttributeValue.js'
+import escapeAttributeName from './escapeAttributeName.js'
+import escapeAttributeValue from './escapeAttributeValue.js'
 
 /**
  * Converts an object with XML attribute values to a string.
@@ -11,6 +11,6 @@ import sanitizeAttributeValue from './sanitizeAttributeValue.js'
  */
 export default function getAttributesString(attributes) {
 	return Object.keys(attributes)
-		.map(name => `${sanitizeAttributeName(name)}="${sanitizeAttributeValue(String(attributes[name]))}"`)
+		.map(name => `${escapeAttributeName(name)}="${escapeAttributeValue(String(attributes[name]))}"`)
 		.reduce((combined, part) => combined + ' ' + part, '')
 }

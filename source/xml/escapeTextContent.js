@@ -1,4 +1,4 @@
-import escapeXmlCharacters from './escapeXmlCharacters.js'
+import escapeXmlSpecialCharacters from './escapeXmlSpecialCharacters.js'
 import removeInvalidXmlCharacters from './removeInvalidXmlCharacters.js'
 
 /**
@@ -6,9 +6,9 @@ import removeInvalidXmlCharacters from './removeInvalidXmlCharacters.js'
  * @param {string} textContent
  * @returns {string}
  */
-export default function sanitizeTextContent(textContent) {
+export default function escapeTextContent(textContent) {
 	if (typeof textContent !== 'string') {
 		throw new TypeError('Argument must be a string')
 	}
-	return escapeXmlCharacters(removeInvalidXmlCharacters(textContent), { isAttributeValue: false })
+	return escapeXmlSpecialCharacters(removeInvalidXmlCharacters(textContent), { isAttributeValue: false })
 }

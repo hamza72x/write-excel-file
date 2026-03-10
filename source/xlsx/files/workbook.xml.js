@@ -1,7 +1,7 @@
 import getAdditionalContent from '../helpers/features/getAdditionalContent.js'
 import transformContent from '../helpers/features/transformContent.js'
 
-import $attributeValue from '../../xml/sanitizeAttributeValue.js'
+import $attributeValue from '../../xml/escapeAttributeValue.js'
 
 export default function generateWorkbookXml({
 	sheetIdsAndNames,

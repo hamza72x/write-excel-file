@@ -19,6 +19,11 @@
       "import": "./universal/index.js",
       "require": "./universal/index.cjs"
     },
+    "./utility": {
+      "types": "./utility/index.d.ts",
+      "import": "./utility/index.js",
+      "require": "./utility/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "sideEffects": false,

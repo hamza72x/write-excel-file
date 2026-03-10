@@ -1,4 +1,4 @@
-import getAttributesString from '../../../xml/getAttributesString.js'
+import getSelfClosingTagMarkup from '../../../xml/getSelfClosingTagMarkup.js'
 
 export default function generateViews({
 	sheetIndex,
@@ -39,8 +39,7 @@ export default function generateViews({
 	}
 
 	views += '<sheetViews>'
-	views += `<sheetView${getAttributesString(sheetViewAttributes)}>`
-	views += '</sheetView>'
+	views += getSelfClosingTagMarkup('sheetView', sheetViewAttributes)
 	views += '</sheetViews>'
 
 	return views

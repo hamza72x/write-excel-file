@@ -1,4 +1,4 @@
-import escapeXmlCharacters from './escapeXmlCharacters.js'
+import escapeXmlSpecialCharacters from './escapeXmlSpecialCharacters.js'
 import removeInvalidXmlCharacters from './removeInvalidXmlCharacters.js'
 
 /**
@@ -6,9 +6,9 @@ import removeInvalidXmlCharacters from './removeInvalidXmlCharacters.js'
  * @param {string} attributeValue
  * @returns {string}
  */
-export default function sanitizeAttributeValue(attributeValue) {
+export default function escapeAttributeValue(attributeValue) {
 	if (typeof attributeValue !== 'string') {
 		throw new TypeError('Argument must be a string')
 	}
-	return escapeXmlCharacters(removeInvalidXmlCharacters(attributeValue), { isAttributeValue: true })
+	return escapeXmlSpecialCharacters(removeInvalidXmlCharacters(attributeValue), { isAttributeValue: true })
 }

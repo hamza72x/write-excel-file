@@ -1,12 +1,18 @@
 import findElement from '../../xml/findElement.js'
-import getAttributesString from '../../xml/getAttributesString.js'
+import replaceElement from '../../xml/replaceElement.js'
+import prependMarkupInsideElement from '../../xml/prependMarkupInsideElement.js'
+import appendMarkupInsideElement from '../../xml/appendMarkupInsideElement.js'
 import getCellCoordinate from '../helpers/getCellCoordinate.js'
+import getOpeningTagMarkup from '../../xml/getOpeningTagMarkup.js'
+import getClosingTagMarkup from '../../xml/getClosingTagMarkup.js'
+import getSelfClosingTagMarkup from '../../xml/getSelfClosingTagMarkup.js'
+import findElementInsideElement from '../../xml/findElementInsideElement.js'
 
 export default {
 	files: {
 		transform: {
 			'xl/worksheets/sheet{id}.xml': {
-				transform(xml, { stickyRowsCount, stickyColumnsCount, sheetIndex, sheetId }) {
+				transform(xml, { stickyRowsCount, stickyColumnsCount }, { sheetIndex, sheetId }) {
 					if (stickyRowsCount || stickyColumnsCount) {
 						const paneAttributes = {
 							// The vertical position of the split, in 1/20th of a point (twips),
@@ -32,20 +38,16 @@ export default {
 						if (sheetViewElement) {
 							// Add a `<pane/>` element inside the `<sheetView/>` element.
 							// If a `<pane/>` element already exists, it will overwrite it.
-							const sheetViewInnerXml = xml.slice(sheetViewElement.openingTagEndIndex + 1, sheetViewElement.closingTagStartIndex)
-							const paneElement = findElement(sheetViewInnerXml, 'pane')
-							const paneXml = `<pane${getAttributesString(paneAttributes)}/>`
+							const paneElement = findElementInsideElement(xml, 'pane', sheetViewElement)
+							const paneXml = getSelfClosingTagMarkup('pane', paneAttributes)
 							if (paneElement) {
 								// Overwrite the existing `<pane/>` element.
 								// It doesn't seem to be any sense in patching the existing `<pane/>` element
 								// because all of its properties would be rewritten anyway in the process.
-								xml =
-									xml.slice(0, sheetViewElement.openingTagEndIndex + 1 + paneElement.openingTagStartIndex) +
-									paneXml +
-									xml.slice(sheetViewElement.openingTagEndIndex + 1 + (paneElement.selfClosingTag ? paneElement.openingTagEndIndex : paneElement.closingTagEndIndex) + 1)
+								xml = replaceElement(xml, paneElement, paneXml)
 							} else {
 								// Add a `<pane/>` element.
-								xml = xml.replace('</sheetView>', paneXml + '</sheetView>')
+								xml = appendMarkupInsideElement(xml, sheetViewElement, paneXml)
 							}
 						} else {
 							// Add a `<sheetViews/>` element.
@@ -59,18 +61,17 @@ export default {
 								tabSelected: sheetIndex === 0 ? 1 : 0, // The first sheet is selected by default.
 								workbookViewId: 0
 							}
-							const paneXml = `<pane${getAttributesString(paneAttributes)}/>`
-							const sheetViewXml = `<sheetView${getAttributesString(sheetViewAttributes)}>${paneXml}</sheetView>`
-							const sheetViewsXml = `<sheetViews>${sheetViewXml}</sheetViews>`
-							const worksheetElement = findElement(xml, 'worksheet')
+							const sheetViewsXml =
+								getOpeningTagMarkup('sheetViews') +
+								getOpeningTagMarkup('sheetView', sheetViewAttributes) +
+								getSelfClosingTagMarkup('pane', paneAttributes) +
+								getClosingTagMarkup('sheetView', sheetViewAttributes) +
+								getClosingTagMarkup('sheetViews')
 
 							// Add a `<sheetViews/>` element with a child '<sheetView/>` element with a child `<pane/>` element.
 							// For some reason, Excel 2007 demands `<sheetViews/>` element to be the first one in a `<worksheet/>` element.
-							xml =
-								xml.slice(0, worksheetElement.openingTagEndIndex + 1) +
-								// For some weird reason, Excel 2007 demands `<sheetViews/>` element to be the first one.
-								sheetViewsXml +
-								xml.slice(worksheetElement.openingTagEndIndex + 1)
+							const worksheetElement = findElement(xml, 'worksheet')
+							xml = prependMarkupInsideElement(xml, worksheetElement, sheetViewsXml)
 						}
 					}
 

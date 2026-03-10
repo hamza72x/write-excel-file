@@ -1,11 +1,11 @@
-import findElements from './findElements.js'
+import findElements_ from './findElements_.js'
 
 /**
  * Finds a single element in valid XML markup.
  * @param {string} xml — XML markup
  * @param {string} tagName — The name of the element to find
- * @returns {object[]} — A list of found elements, each represented by an object with propeties: `{ openingTagXml: string, openingTagStartIndex: number, openingTagEndIndex: number, openingTagAttributes: object, selfClosingTag?: boolean, closingTagXml?: string, closingTagStartIndex?: number, closingTagEndIndex?: number }`
+ * @returns {object|undefined} — A found element, represented by an object with propeties: `{ openingTagStartIndex: number, openingTagEndIndex: number, openingTagAttributes: object, selfClosingTag?: boolean, closingTagStartIndex?: number, closingTagEndIndex?: number }`
  */
 export default function findElement(xml, tagName) {
-	return findElements(xml, tagName)[0]
+	return findElements_(xml, tagName, true)[0]
 }
