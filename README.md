@@ -30,7 +30,13 @@ Alternatively, one could include it on a web page [directly](#cdn) via a `<scrip
 
 ## Use
 
-To write an `.xlsx` file, one must provide the contents of a spreadsheet in the form of `data` — an array of rows. Each row must be an array of cells. Each cell should be represented by a value.
+The default exported function — let's call it `writeExcelFile()` — creates an `.xslx` file from sheet data.
+
+```js
+await writeExcelFile(data, { filePath: '/path/to/file.xlsx' })
+```
+
+Sheet data must be an array of rows. Each row must be an array of cells. Each cell should be represented by a value — `string`, `number`, `boolean` or `Date` — or be `null` in case it's empty.
 
 Example:
 
@@ -49,8 +55,6 @@ Output:
 | x | 123 | TRUE |
 | y | 456 | FALSE |
 
-An empty cell could be represented by `null` or `undefined`.
-
 A cell could also be represented by an object with properties: `value`, (optional) `type`, and, optionally, other [cell parameters](#cell-parameters) such as style or a specific `format`:
 
 ```js
@@ -68,7 +72,7 @@ Output:
 | 1 | $1,234.56 |
 | 2 | $789.00 |
 
-The `type` property is optional because it is automatically detected from the `value` property, or defaults to `String` if the `value` is empty or not supported.
+The aforementioned `type` property is optional because it is automatically detected from the `value` property, or defaults to `String` if the `value` is empty or not supported.
 
 Possible `type`:
 * `String`
@@ -102,7 +106,6 @@ const blob = await writeExcelFile(data)
 Example 1: Write `data` to a file at path `/path/to/file.xlsx`.
 
 ```js
-// Import from '/node' subpackage.
 import writeExcelFile from 'write-excel-file/node'
 
 await writeExcelFile(data, {
@@ -127,13 +130,13 @@ const blob = await writeExcelFile(data, { blob: true })
 Example 3: Neither `filePath` nor `buffer: true` <!-- nor `blob: true` --> parameters are passed, so it returns a readable [`Stream`](https://nodejs.org/api/stream.html).
 
 ```js
-const writeStream = fs.createWriteStream('/path/to/file.xlsx')
 const readStream = await writeExcelFile(data)
+const writeStream = fs.createWriteStream('/path/to/file.xlsx')
 readStream.pipe(writeStream)
 ```
 
 <details>
-<summary>AWS S3 could refuse to read from the returned <code>stream</code>. Here's a fix.</summary>
+<summary>AWS S3 could refuse to read from the returned stream. Here's a fix.</summary>
 
 #####
 
@@ -160,7 +163,6 @@ Workaround for AWS SDK [v3](https://aws.amazon.com/blogs/developer/modular-packa
 The one that works both in a web browser and Node.js. Only supports returning a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob), which could be a bit less convenient for some.
 
 ```js
-// Import from '/universal' subpackage.
 import writeExcelFile from 'write-excel-file/universal'
 
 // outputs a `Blob`.
