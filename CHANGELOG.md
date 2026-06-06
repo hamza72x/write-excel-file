@@ -1,3 +1,11 @@
+4.0.8 / 06.06.2026
+==================
+
+* "Features" can now transform XML element attributes in the form of a JSON object. See the new `transformElementAttributes()` function.
+  * Currently, it only supports the following files:
+    * `xl/worksheets/sheet{id}.xml`
+    * `xl/workbook.xml`
+
 4.0.6 / 07.05.2026
 ==================
 
