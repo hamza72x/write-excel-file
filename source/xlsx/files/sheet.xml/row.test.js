@@ -1,11 +1,14 @@
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 
+import getElementXml from '../../helpers/features/getElementXml.js'
+
 import generateRow from './row.js'
 
 describe('generateRow()', () => {
   it('Should create one row from given data', () => {
     expect(generateRow(
+      tag,
       [
         { value: 'Test', type: String },
         { value: 1000, type: Number }
@@ -15,6 +18,9 @@ describe('generateRow()', () => {
         findOrCreateSharedString(string) {
           return 0
         },
+        sheetIndex: 0,
+        sheetId: 1,
+        sheetOptions: {},
         features: []
       }
     )).to.equal(
@@ -23,3 +29,7 @@ describe('generateRow()', () => {
     )
   })
 })
+
+function tag(tagName, attributes, innerXml) {
+  return getElementXml('xl/worksheets/sheet{id}.xml', tagName, attributes, innerXml, 0, {}, {}, [])
+}
