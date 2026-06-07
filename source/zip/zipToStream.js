@@ -21,7 +21,7 @@ import { PassThrough } from 'node:stream'
 // But enabling this flag also requires using `strToU8()` function instead of `Buffer.from()`,
 // which is controlled by setting `PASS_FILE_CONTENT_AS_NODE_BUFFER` flag to `true` or `false`,
 // and which itself results in a bug when it converts every file content to a sequence of comma-split numbers.
-// https://github.com/101arrowz/fflate/issues/...
+// https://github.com/101arrowz/fflate/issues/279
 //
 // Because of that, this flag is disabled.
 //
