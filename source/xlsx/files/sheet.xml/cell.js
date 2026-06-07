@@ -1,7 +1,7 @@
 import sanitizeTextContent from '../../../xml/sanitizeTextContent.js'
 
-import getCellCoordinate from '../../helpers/getCellCoordinate.js'
-import convertDateToExcelSerial from './helpers/convertDateToExcelSerial.js'
+import getCellAddress from '../../helpers/getCellAddress.js'
+import convertDateToSerialNumber from '../../helpers/convertDateToSerialNumber.js'
 
 export default function generateCell(
   tag,
@@ -24,7 +24,7 @@ export default function generateCell(
   }
 
   const cellAttributes = {
-    r: getCellCoordinate(rowIndex, index)
+    r: getCellAddress(rowIndex, index)
   }
 
   // Available formatting style IDs (built-in in Excel):
@@ -122,7 +122,7 @@ function getValueTextContent(type, value, findOrCreateSharedString) {
       }
       // "d" type doesn't seem to work.
       // return value.toISOString()
-      return String(convertDateToExcelSerial(value))
+      return String(convertDateToSerialNumber(value))
 
     case Boolean:
       if (typeof value !== 'boolean') {

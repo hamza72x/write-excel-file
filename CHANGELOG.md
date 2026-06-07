@@ -8,6 +8,10 @@
     * `xl/worksheets/sheet{id}.xml`
     * `xl/workbook.xml`
 
+* The `/utility` subpackage now exports two additional functions:
+  * `getCellAddress(rowIndex, columnIndex)` — Converts cell row and column indexes to an address like `A1`, `B2`, etc.
+  * `convertDateToSerialNumber(date)` — Converts a `Date` to an XLSX ["serial number"](https://support.microsoft.com/en-us/office/date-systems-in-excel-e7fe7167-48a9-4b96-bb53-5612a800b487).
+
 4.0.6 / 07.05.2026
 ==================
 

@@ -611,6 +611,8 @@ When choosing "raw" XML markup manipulation, one could utilize the few ["helper"
 * `sanitizeAttributeName('attribute')` — "Sanitizes" a string for output as an attribute name. Removes any illegal characters. Escapes any "special" characters.
 * `sanitizeAttributeValue('value')` — "Sanitizes" a string for output as an attribute value. Removes any illegal characters. Escapes any "special" characters.
 * `sanitizeTextContent('text')` — "Sanitizes" a string for output as text content of an XML element. Removes any illegal characters. Escapes any "special" characters.
+* `getCellAddress(rowIndex, columnIndex)` — Converts cell row and column indexes to an address like `A1`, `B2`, etc.
+* `convertDateToSerialNumber(date)` — Converts a `Date` to an XLSX ["serial number"](https://support.microsoft.com/en-us/office/date-systems-in-excel-e7fe7167-48a9-4b96-bb53-5612a800b487).
 
 For an example of a "feature" implementation see [`./source/xlsx/features`](https://gitlab.com/catamphetamine/write-excel-file/-/tree/main/source/xlsx/features) directory of the code repository. Also see the definition of the `Feature` TypeScript interface in `./index.d.ts` file and also see `./types/features` directory for TypeScript definitions of the built-in "features". Also, see an [example](https://gitlab.com/catamphetamine/write-excel-file/-/blob/main/README_FEATURE_SENSITIVITY_LABEL.md) that adds a "sensitivity label" feature.
 
