@@ -1,5 +1,7 @@
-4.0.8 / 06.06.2026
+4.1.0 / 07.06.2026
 ==================
+
+* In `write-excel-file/node` export, replaced `archiver` dependency with `fflate`. In other words, in Node.js, `.xlsx` file internals zipping is now done by `fflate` package rather than `archiver` package.
 
 * "Features" can now transform XML element attributes in the form of a JSON object. See the new `transformElementAttributes()` function.
   * Currently, it only supports the following files:
