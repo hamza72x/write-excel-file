@@ -96,7 +96,9 @@ export default function generateXlsxFileContents(arg1, arg2, arg3) {
   for (const { sheetId, sheetXmlParameters } of sheets) {
     const sheetOptions = sheetsOptions[sheetIndex]
 
-    files[`xl/worksheets/sheet${sheetId}.xml`] = generateSheetXml(sheetXmlParameters, features)
+    const sheetXml = generateSheetXml(sheetXmlParameters, { streaming: false }, features)
+
+    files[`xl/worksheets/sheet${sheetId}.xml`] = sheetXml
 
     files[`xl/worksheets/_rels/sheet${sheetId}.xml.rels`] = generateSheetXmlRels({
       sheetIndex,

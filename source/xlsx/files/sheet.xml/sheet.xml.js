@@ -1,6 +1,7 @@
 import generateSheetViews from './sheetViews.js'
 import generateColumnsDescription from './columns.js'
 import generateSheetData from './sheetData.js'
+import generateRow from './row.js'
 import processMergedCells from './processMergedCells.js'
 import generateMergedCellsDescription from './mergedCellsDescription.js'
 import generatePageMargins from './pageMargins.js'
@@ -12,7 +13,7 @@ import transformContent from '../../helpers/features/transformContent.js'
 
 import getElementXml from '../../helpers/features/getElementXml.js'
 
-export default function generateSheetXml(sheetXmlParameters, features) {
+export default function generateSheetXml(sheetXmlParameters, { streaming }, features) {
 	const {
 		sheetData: sheetData_,
 		sheetOptions,
@@ -65,13 +66,16 @@ export default function generateSheetXml(sheetXmlParameters, features) {
 			// `<cols/>`
 			generateColumnsDescription(tag, columns) +
 			// `<sheetData/>`
-			generateSheetData(tag, sheetData, {
-				findOrCreateCellStyle,
-				findOrCreateSharedString,
-				hasDefaultFont,
-				dateFormat,
-				features
-			}) +
+			(streaming
+				? '<sheetData></sheetData>'
+				: generateSheetData(tag, sheetData, {
+					findOrCreateCellStyle,
+					findOrCreateSharedString,
+					hasDefaultFont,
+					dateFormat,
+					features
+				})
+			) +
 			// `<mergeCells/>`
 			generateMergedCellsDescription(tag, mergedCells) +
 			// `<pageMargins/>`
@@ -97,6 +101,32 @@ export default function generateSheetXml(sheetXmlParameters, features) {
 		sheetOptions,
 		{ sheetIndex, sheetId }
 	)
+
+	if (streaming) {
+		const sheetDataOpeningTagIndex = xml.indexOf('<sheetData></sheetData>')
+		if (sheetDataOpeningTagIndex < 0) {
+			throw new Error('Unexpected <sheetData/> element')
+		}
+		const sheetDataClosingTagIndex = sheetDataOpeningTagIndex + '<sheetData>'.length
+
+		return {
+			xmlBeforeRowsXml: xml.slice(0, sheetDataClosingTagIndex),
+			xmlAfterRowsXml: xml.slice(sheetDataClosingTagIndex),
+			rowCount: sheetData.length,
+			getRowXml(rowIndex) {
+				if (rowIndex < 0 || rowIndex >= sheetData.length) {
+					throw new Error('Row index out of bounds')
+				}
+				return generateRow(tag, sheetData[rowIndex], rowIndex, {
+					findOrCreateCellStyle,
+					findOrCreateSharedString,
+					hasDefaultFont,
+					dateFormat,
+					features
+				})
+			}
+		}
+	}
 
 	return xml
 }
