@@ -552,6 +552,51 @@ export default {
 		}
 	},
 
+	'custom-feature-transform-element-content-replace-fourth-column-value-to-false-and-make-second-sheet-active': {
+		args: () => {
+			const customFeature = {
+				files: {
+					transform: {
+						'xl/workbook.xml': {
+							transformElementContent: (tagName, content, index, sheetOptions, properties) => {
+								if (tagName === 'bookViews' && index === undefined) {
+									return '<workbookView activeTab="1"/>'
+								}
+								return content
+							}
+						},
+
+						'xl/worksheets/sheet{id}.xml': {
+							transformElementContent: (tagName, content, index, sheetOptions, properties) => {
+								if (tagName === 'c') {
+									// Test the correctness of `properties` and `sheetOptions`.
+									if (properties.sheetIndex === 1 && properties.sheetId === '2' && sheetOptions.columns === columns) {
+										if (index === 3) {
+											// Transform "boolean" cell type to "number" cell type.
+											return '<v>0</v>'
+										}
+									}
+								}
+								return content
+							}
+						}
+					}
+				}
+			};
+
+			return [
+				[{
+					data,
+					columns
+				}, {
+					data,
+					columns
+				}],
+				{ features: [customFeature] }
+			]
+		}
+	},
+
 	'custom-feature-transform-element-attributes-replace-fourth-column-type-from-boolean-to-number-and-rename-sheet': {
 		args: () => {
 			const customFeature = {
