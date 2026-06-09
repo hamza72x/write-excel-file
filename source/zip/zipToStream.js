@@ -4,13 +4,7 @@
 // In the comments to `ZipDeflate` in `fflate` package, it says:
 // "Streaming DEFLATE compression for ZIP archives. Prefer using AsyncZipDeflate for better performance"
 //
-import { Zip, ZipDeflate, AsyncZipDeflate, strToU8 } from 'fflate'
-
-// Using `Buffer.from()` to `.push()` data into an `AsyncZipDeflate` instance
-// resulted in an error: "DataCloneError: Cannot transfer object of unsupported type."
-// https://github.com/101arrowz/fflate/issues/278
-// So instead of `Buffer.from()`, `fflate`'s `strToU8()` function is used.
-import { Buffer } from 'node:buffer'
+import { Zip, ZipDeflate, AsyncZipDeflate } from 'fflate'
 
 import { PassThrough } from 'node:stream'
 
@@ -18,21 +12,13 @@ import { PassThrough } from 'node:stream'
 // results in better performance because this way multiple files are compressed
 // in-parallel rather than in-sequence. In other words, multiple CPU cores get utilized.
 //
-// But enabling this flag also requires using `strToU8()` function instead of `Buffer.from()`,
-// which is controlled by setting `PASS_FILE_CONTENT_AS_NODE_BUFFER` flag to `true` or `false`,
-// and which itself results in a bug when it converts every file content to a sequence of comma-split numbers.
-// https://github.com/101arrowz/fflate/issues/279
+// But using this feature causes "DataCloneError: Cannot transfer object of unsupported type"
+// error in Node.js
+// https://github.com/101arrowz/fflate/issues/278
 //
 // Because of that, this flag is disabled.
 //
 const COMPRESS_FILES_IN_PARALLEL = false
-
-// Using `Buffer.from()` to `.push()` data into an `AsyncZipDeflate` instance
-// resulted in an error: "DataCloneError: Cannot transfer object of unsupported type."
-// https://github.com/101arrowz/fflate/issues/278
-// So instead of `Buffer.from()`, `fflate`'s `strToU8()` function should be used
-// to convert text file contents to a `Uint8Array`.
-const PASS_FILE_CONTENT_AS_NODE_BUFFER = true
 
 /**
  * Creates a `*.zip` file from a map of files in a "streaming" fashion.
@@ -68,10 +54,11 @@ export default function zipToStream(files) {
 	const start = (zip) => {
 		// Push each file's data to be compressed by `fflate`'s `Zip` class instance.
 		for (const filePath of Object.keys(fileDataSources)) {
-			const fileData = PASS_FILE_CONTENT_AS_NODE_BUFFER
-				? Buffer.from(files[filePath])
-				: strToU8(files[filePath])
-			fileDataSources[filePath].push(fileData, true)
+			if (files[filePath] instanceof Uint8Array) {
+				fileDataSources[filePath].push(files[filePath], true)
+			} else {
+				throw new Error(`Unsupported file data: ${files[filePath]}`)
+			}
 		}
 		// Finalize the `.zip` archive:
 		// no more files will be added to it.
