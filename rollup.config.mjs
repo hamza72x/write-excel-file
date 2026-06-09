@@ -36,6 +36,7 @@ export default [
     input: './test/writeXlsxFile.testCases.js',
     plugins: [
       json(),
+      terser(),
       nodeResolve({
         browser: true
       }),
