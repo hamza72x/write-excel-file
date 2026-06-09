@@ -38,6 +38,29 @@ interface FeatureTransformFile_<Options, Properties> {
 		options: Options,
 		properties: Properties
 	) => ElementAttributes;
+
+	// Transforms a given element's "inner XML".
+	// Currently, it only supports the following files:
+	// * 'xl/worksheets/sheet{id}.xml'
+	// * 'xl/workbook.xml'
+	transformElementContent?: (
+		tagName: string,
+		content: string | null,
+		// `index` property is a "logical" index of the element inside its parent element.
+		// It's not necessarily same as the actual index of the element inside the parent.
+		//
+		// For example, empty rows won't result in actual insertion of an `<r/>` element.
+		// Yet, `transformElementAttributes()` function will be called for each row,
+		// regardless of whether it's empty or not, with the `index` property being equal
+		// to the row index.
+		//
+		// The `index` is only present where it makes sense, i.e. when iterating through children
+		// having same tag name, such as iterating through `<r/>` elements inside `<sheetData/>`.
+		//
+		index: number | undefined,
+		options: Options,
+		properties: Properties
+	) => string | null;
 }
 
 type ElementAttributes = Record<string, string | number>

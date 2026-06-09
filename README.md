@@ -586,7 +586,7 @@ An `.xlsx` file is really just a `*.zip` archive with the `.zip` file extension 
 
 When implementing a "feature", there're two approaches to modifying `*.xml` files: either by "raw" XML markup manipulation or by JSON attributes modification. A developer could choose whatever's more convenient.
 
-JSON attributes modification works on a per-element basis, but is only supported for `xl/worksheets/sheet{id}.xml` and `xl/workbook.xml` files. To use it, define a `transformElementAttributes(tagName, attributes: object, index?, options, properties): object` function. See the TypeScript definition for more details.
+JSON attributes modification works on a per-element basis, but is only supported for `xl/worksheets/sheet{id}.xml` and `xl/workbook.xml` files. To use it, define a `transformElementAttributes()` or `transformElementContent()` function. See the TypeScript definition for more details.
 
 When choosing "raw" XML markup manipulation, one could utilize the few ["helper" functions](https://gitlab.com/catamphetamine/write-excel-file/-/tree/main/source/xml) that are available for import from `write-excel-file/utility` subpackage — the built-in "features" use these same helper functions:
 

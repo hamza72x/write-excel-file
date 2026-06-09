@@ -1,3 +1,11 @@
+4.1.2 / 10.06.2026
+==================
+
+* Added `transformElementContent()` function in custom "feature" API.
+  * Currently, it only supports the following files:
+    * `xl/worksheets/sheet{id}.xml`
+    * `xl/workbook.xml`
+
 4.1.0 / 07.06.2026
 ==================
 
